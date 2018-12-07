@@ -18,8 +18,11 @@ qx.Class.define("vehiculos.comp.windowSal",
 	this.setLayout(new qx.ui.layout.Canvas());
 
 	this.addListenerOnce("appear", function(e){
-		this.setCaption("Salida, " + vehiculo.nro_patente + "  " + vehiculo.marca);
-		txtResp_sal.focus();
+		var timer = qx.util.TimerManager.getInstance();
+		timer.start(function() {
+			this.setCaption("Salida, " + vehiculo.nro_patente + "  " + vehiculo.marca);
+			txtResp_sal.focus();
+		}, null, this, null, 50);
 	}, this);
 	
 	
@@ -28,10 +31,12 @@ qx.Class.define("vehiculos.comp.windowSal",
 	var form = new qx.ui.form.Form();
 	
 	var txtResp_sal = new qx.ui.form.TextField("");
+	txtResp_sal.setEnabled(false);
 	txtResp_sal.setMinWidth(200);
 	form.add(txtResp_sal, "Responsable", null, "resp_sal");
 	
 	var cboUnipresu = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Vehiculo", methodName: "autocompletarUnipresu"});
+	cboUnipresu.setEnabled(false);
 	var lstUnipresu = cboUnipresu.getChildControl("list");
 	lstUnipresu.addListener("changeSelection", function(e){
 		/*

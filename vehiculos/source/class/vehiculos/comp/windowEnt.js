@@ -18,8 +18,11 @@ qx.Class.define("vehiculos.comp.windowEnt",
 	this.setLayout(new qx.ui.layout.Canvas());
 
 	this.addListenerOnce("appear", function(e){
-		this.setCaption("Entrada, " + vehiculo.nro_patente + "  " + vehiculo.marca);
-		txtKilo.focus();
+		var timer = qx.util.TimerManager.getInstance();
+		timer.start(function() {
+			this.setCaption("Entrada, " + vehiculo.nro_patente + "  " + vehiculo.marca);
+			txtKilo.focus();
+		}, null, this, null, 50);
 	}, this);
 	
 	
@@ -40,6 +43,7 @@ qx.Class.define("vehiculos.comp.windowEnt",
 	form.add(txtKilo, "Kilometraje", null, "kilo", null, {grupo: 1, item: {row: 1, column: 1, colSpan: 4}});
 	
 	var txtResp_ent = new qx.ui.form.TextField("");
+	txtResp_ent.setEnabled(false);
 	form.add(txtResp_ent, "Responsable", null, "resp_ent", null, {grupo: 1, item: {row: 2, column: 1, colSpan: 11}});
 	
 	var txtObserva_ent = new qx.ui.form.TextArea("");
@@ -50,6 +54,7 @@ qx.Class.define("vehiculos.comp.windowEnt",
 	form.add(txtObserva_ent, "Observaciones", null, "observa_ent", null, {grupo: 1, item: {row: 3, column: 1, colSpan: 11, rowSpan: 17}});
 	
 	var cboUnipresu = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Vehiculo", methodName: "autocompletarUnipresu"});
+	cboUnipresu.setEnabled(false);
 	var lstUnipresu = cboUnipresu.getChildControl("list");
 	lstUnipresu.addListener("changeSelection", function(e){
 		/*

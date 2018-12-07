@@ -7,6 +7,7 @@ $password = "";
 $base = "vehiculos_minproduccion";
 
 
+
 /*
 $servidor = "10.1.1.4";
 $usuario = "root";

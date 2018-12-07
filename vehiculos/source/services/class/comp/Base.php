@@ -28,7 +28,7 @@ class class_Base
 			}
 
 			
-			$timeout_duration = 60 * 3;
+			//$timeout_duration = 60 * 3;
 			
 			if (($request_time - $_SESSION["vehiculos_LAST_ACTIVITY"]) > $timeout_duration) {
 				throw new JsonRpcError("sesion_terminada", 0);

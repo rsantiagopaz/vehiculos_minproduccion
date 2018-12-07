@@ -97,7 +97,7 @@ qx.Class.define("vehiculos.comp.windowLogin",
 	var slbArea = new qx.ui.form.SelectBox();
 	slbArea.setRequired(true);
 	slbArea.setMinWidth(300);
-	form.add(slbArea, "Area", null, "id_sist_perfil_usuario_oas");
+	form.add(slbArea, "Area", null, "organismo_area_id");
 	
 	
 	
@@ -153,9 +153,9 @@ qx.Class.define("vehiculos.comp.windowLogin",
 	
 	
 	if (qx.core.Environment.get("qx.debug")) {
-		aux = qx.data.marshal.Json.createModel({usuario: "rsantiagopaz", password: "ramon", id_sist_perfil_usuario_oas: null}, true);
+		aux = qx.data.marshal.Json.createModel({usuario: "jorgemitre", password: "jorgemitre", organismo_area_id: null}, true);
 	} else {
-		aux = qx.data.marshal.Json.createModel({usuario: "", password: "", id_sist_perfil_usuario_oas: null}, true);
+		aux = qx.data.marshal.Json.createModel({usuario: "", password: "", organismo_area_id: null}, true);
 	}
 
 	controllerForm.setModel(aux);

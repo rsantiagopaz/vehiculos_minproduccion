@@ -20,6 +20,7 @@ qx.Class.define("vehiculos.comp.pageGeneral",
 	var functionActualizarGral = this.functionActualizarGral = function(){
 		var p = {};
 		p.ver = radioGroup.getSelection()[0].getUserData("datos");
+		
 		//alert(qx.lang.Json.stringify(p, null, 2));
 
 		var rpc = new vehiculos.comp.rpc.Rpc("services/", "comp.Vehiculo");

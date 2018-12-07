@@ -9,7 +9,10 @@ qx.Class.define("vehiculos.comp.pageParticular",
 	this.setLayout(new qx.ui.layout.Grow());
 	
 	this.addListenerOnce("appear", function(e){
-		cboVehiculo.focus();
+		var timer = qx.util.TimerManager.getInstance();
+		timer.start(function() {
+			cboVehiculo.focus();
+		}, null, this, null, 50);
 	});
 	
 	this.addListener("appear", function(e){
@@ -522,7 +525,19 @@ qx.Class.define("vehiculos.comp.pageParticular",
 	aux.setReadOnly(true);
 	aux.setDecorator("main");
 	aux.setBackgroundColor("#ffffc0");
+	formInfoVehiculo.add(aux, "Nro.seguro/póliza", null, "nro_poliza");
+	
+	aux = new qx.ui.form.TextField();
+	aux.setReadOnly(true);
+	aux.setDecorator("main");
+	aux.setBackgroundColor("#ffffc0");
 	formInfoVehiculo.add(aux, "Dependencia", null, "dependencia");
+	
+	aux = new qx.ui.form.TextField();
+	aux.setReadOnly(true);
+	aux.setDecorator("main");
+	aux.setBackgroundColor("#ffffc0");
+	formInfoVehiculo.add(aux, "Responsable", null, "responsable");
 	
 	aux = new qx.ui.form.Spinner(0, 0, 1000000);
 	aux.setEditable(false);

@@ -165,6 +165,16 @@ qx.Class.define("vehiculos.Application",
       
       var mnuEdicion = new qx.ui.menu.Menu();
       
+      var btnResponsable = new qx.ui.menu.Button("Responsables...");
+      btnResponsable.addListener("execute", function(){
+        var win = new vehiculos.comp.windowResponsable();
+        win.setModal(true);
+        doc.add(win);
+        win.center();
+        win.open();
+      });
+      mnuEdicion.add(btnResponsable);
+      
       var btnNuevoVehiculo = new qx.ui.menu.Button("Vehículos...");
       btnNuevoVehiculo.addListener("execute", function(){
         var win = new vehiculos.comp.windowVehiculo();
@@ -301,7 +311,7 @@ qx.Class.define("vehiculos.Application",
       tabviewMain.add(pageMas);
       
       var timer = qx.util.TimerManager.getInstance();
-      timer.start(pageGeneral.functionActualizarGral, 30000);
+      //timer.start(pageGeneral.functionActualizarGral, 30000);
       
       
       }

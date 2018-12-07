@@ -376,6 +376,20 @@ class class_Vehiculo extends class_Base
 			$row->dependencia = "";
 		}
 		
+		
+		
+		$sql = "SELECT id_responsable AS model, CONCAT(apenom, ' - ', dni) AS label FROM responsable WHERE id_responsable='" . $row->id_responsable . "'";
+		
+		$rsResponsable = $this->mysqli->query($sql);
+		if ($rsResponsable->num_rows > 0) {
+			$rowResponsable = $rsResponsable->fetch_object();
+			$row->responsable = $rowResponsable->label;
+		} else {
+			$row->responsable = "";
+		}
+		
+		
+		
 		$resultado[] = $row;
 	}
 
@@ -511,6 +525,24 @@ class class_Vehiculo extends class_Base
   }
   
   
+  public function method_agregar_foto_comodato($params, $error) {
+  	$p = $params[0];
+  	
+	if (is_file("documentos/comodato_0.jpg")) unlink("documentos/comodato_0.jpg");
+	rename("php-traditional-server-master/files/" . $p->uuid . "/" . $p->uploadName, "documentos/comodato_0.jpg");
+	rmdir("php-traditional-server-master/files/" . $p->uuid);
+  }
+  
+  
+  public function method_agregar_foto_vehiculo($params, $error) {
+  	$p = $params[0];
+  	
+  	if (is_file("documentos/vehiculo_0.jpg")) unlink("documentos/vehiculo_0.jpg");
+	rename("php-traditional-server-master/files/" . $p->uuid . "/" . $p->uploadName, "documentos/vehiculo_0.jpg");
+	rmdir("php-traditional-server-master/files/" . $p->uuid);
+  }
+  
+  
   public function method_asignar_asunto($params, $error) {
   	$p = $params[0];
   	
@@ -612,6 +644,16 @@ class class_Vehiculo extends class_Base
 		
 		$rsDependencia = $this->mysqli->query($sql);
 		if ($rsDependencia->num_rows > 0) $rowAux->cboDependencia = $rsDependencia->fetch_object();
+		
+		
+		
+		
+		$sql = "SELECT id_responsable AS model, CONCAT(apenom, ' - ', dni) AS label FROM responsable WHERE id_responsable='" . $row->id_responsable . "'";
+		
+		$rsResponsable = $this->mysqli->query($sql);
+		if ($rsResponsable->num_rows > 0) $rowAux->cboResponsable = $rsResponsable->fetch_object();
+		
+		
 
 		$row = $rowAux;
 		
