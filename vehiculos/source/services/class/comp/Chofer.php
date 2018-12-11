@@ -10,12 +10,14 @@ class class_Chofer extends class_Base
   public function method_alta_modifica_chofer($params, $error) {
   	$p = $params[0];
   	
+  	/*
   	$sql = "SELECT dni FROM _personal WHERE dni='" . $p->model->dni . "'";
   	$rs = $this->mysqli->query($sql);
   	if ($rs->num_rows == 0) {
   		$error->SetError(0, "personal");
   		return $error;
   	}
+  	*/
   	
   	$sql = "SELECT id_chofer FROM chofer WHERE dni='" . $p->model->dni . "' AND id_chofer <> " . $p->model->id_chofer;
   	$rs = $this->mysqli->query($sql);
