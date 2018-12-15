@@ -311,7 +311,7 @@ qx.Class.define("vehiculos.Application",
       tabviewMain.add(pageMas);
       
       var timer = qx.util.TimerManager.getInstance();
-      //timer.start(pageGeneral.functionActualizarGral, 30000);
+      timer.start(pageGeneral.functionActualizarGral, 30000);
       
       
       }

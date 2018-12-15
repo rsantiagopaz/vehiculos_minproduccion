@@ -49,33 +49,7 @@ class class_Parametros extends class_Base
 	
 	return $this->toJson($this->mysqli->query($sql));
   }
-  
-  
-  public function method_autocompletarRazonSocial($params, $error) {
-  	$p = $params[0];
-  	
-	if (is_numeric($p->texto)) {
-		$sql = "SELECT";
-		$sql.= "  razones_sociales.cod_razon_social AS model";
-		$sql.= ", CONCAT(proveedores.cuit, ' (', razones_sociales.razon_social, ')') AS label";
-		$sql.= ", proveedores.cuit";
-		$sql.= ", razones_sociales.razon_social";
-		$sql.= " FROM proveedores INNER JOIN razones_sociales USING(cod_proveedor)";
-		$sql.= " WHERE proveedores.cuit LIKE '" . $p->texto . "%'";
-		$sql.= " ORDER BY label";
-	} else {
-		$sql = "SELECT";
-		$sql.= "  razones_sociales.cod_razon_social AS model";
-		$sql.= ", CONCAT(razones_sociales.razon_social, ' (', proveedores.cuit, ')') AS label";
-		$sql.= ", proveedores.cuit";
-		$sql.= ", razones_sociales.razon_social";
-		$sql.= " FROM proveedores INNER JOIN razones_sociales USING(cod_proveedor)";
-		$sql.= " WHERE razones_sociales.razon_social LIKE '%" . $p->texto . "%'";
-		$sql.= " ORDER BY label";
-	}
-	
-	return $this->toJson($sql);
-  }
+
   
   
   public function method_leer_taller($params, $error) {
@@ -152,8 +126,8 @@ class class_Parametros extends class_Base
 	$rs = $this->mysqli->query($sql);
 	while ($row = $rs->fetch_object()) {
 		$sql = "SELECT";
-		$sql.= "  CONCAT(_organismos_areas.organismo_area, ' (', CASE WHEN _organismos_areas.organismo_area_tipo_id='E' THEN _departamentos.departamento ELSE _organismos.organismo END, ')') AS label";
-		$sql.= " FROM (_organismos_areas INNER JOIN _organismos USING(organismo_id)) LEFT JOIN _departamentos ON _organismos_areas.organismo_areas_id_departamento=_departamentos.codigo_indec";
+		$sql.= "  CONCAT(_organismos_areas.organismo_area, ' (', _organismos.organismo, ')') AS label";
+		$sql.= " FROM (_organismos_areas INNER JOIN _organismos USING(organismo_id))";
 		$sql.= " WHERE _organismos_areas.organismo_area_id='" . $row->organismo_area_id . "'";
 		
 		$rsDependencia = $this->mysqli->query($sql);

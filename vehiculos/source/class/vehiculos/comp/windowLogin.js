@@ -40,20 +40,25 @@ qx.Class.define("vehiculos.comp.windowLogin",
 			
 			var rpc = new componente.comp.io.ramon.rpc.Rpc("services/", "comp.ControlAcceso");
 			rpc.addListener("completed", function(e){
-				var resultado = e.getData().result;
+				var data = e.getData();
 				
-				//alert(qx.lang.Json.stringify(resultado, null, 2));
-				//alert(qx.lang.Json.stringify(error, null, 2));
+				//alert(qx.lang.Json.stringify(data, null, 2));
+
 				var item;
 				
-				for (var x in resultado) {
-					item = new qx.ui.form.ListItem(resultado[x].label, null, resultado[x].model);
-					item.setUserData("datos", resultado[x]);
+				for (var x in data.result) {
+					item = new qx.ui.form.ListItem(data.result[x].label, null, data.result[x].model);
+					item.setUserData("datos", data.result[x]);
 					
 					slbArea.add(item);
 				}
 				
 				btnAceptar.setEnabled(true);			
+			});
+			rpc.addListener("failed", function(e){
+				var data = e.getData();
+				
+				//alert(qx.lang.Json.stringify(data, null, 2));
 			});
 			rpc.callAsyncListeners(true, "traer_areas", p);
 		} else {
@@ -153,7 +158,7 @@ qx.Class.define("vehiculos.comp.windowLogin",
 	
 	
 	if (qx.core.Environment.get("qx.debug")) {
-		aux = qx.data.marshal.Json.createModel({usuario: "jorgemitre", password: "jorgemitre", organismo_area_id: null}, true);
+		aux = qx.data.marshal.Json.createModel({usuario: "rsantiagopaz", password: "ramon", organismo_area_id: null}, true);
 	} else {
 		aux = qx.data.marshal.Json.createModel({usuario: "", password: "", organismo_area_id: null}, true);
 	}

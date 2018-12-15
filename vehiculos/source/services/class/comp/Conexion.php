@@ -9,10 +9,10 @@ $base = "vehiculos_minproduccion";
 
 
 /*
-$servidor = "10.1.1.4";
-$usuario = "root";
-$password = "sum4mp4iea!";
-$base = "vehiculos";
+$servidor = "produccion.complejojfi.gob.ar";
+$usuario = "phpmyadmin";
+$password = "cl0d0m1r4iea!";
+$base = "vehiculos_minproduccion";
 */
 
 ?>

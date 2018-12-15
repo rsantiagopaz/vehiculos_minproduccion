@@ -6,8 +6,8 @@ qx.Class.define("vehiculos.comp.windowTaller",
 	this.base(arguments);
 	
 	this.set({
-		width: 320,
-		height: 250,
+		width: 310,
+		height: 200,
 		showMinimize: false,
 		showMaximize: false,
 		allowMaximize: false,

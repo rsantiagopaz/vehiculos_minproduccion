@@ -23,21 +23,28 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 		cboVehiculo.focus();
 		
 		
-		/*
 		var fineUploaderOptionsComodato = {
 		    // options
-			button: btnSeleccionarComodato.getContentElement().getDomElement(),
+			button: lblComodato.getContentElement().getDomElement(),
 			autoUpload: true,
+			multiple: false,
 			request: {
 				endpoint: 'services/php-traditional-server-master/endpoint.php'
 			},
+			validation: {
+				allowedExtensions: ['jpeg', 'jpg', 'gif', 'png'],
+				//acceptFiles: "image/png, image/jpeg",
+				acceptFiles: ".jpeg, .jpg, .gif, .png"
+            },
 		    callbacks: {
 		        onSubmit: function(id, name) {
 		        	//application.popupCargando.mostrarModal();
+		        	imgComodato.setSource("vehiculos/loading66.gif" + "?" + Math.random());
 		        },
 		        
 		        onError: function(id, name, errorReason, xhr) {
-		        	alert(qx.lang.Json.stringify({id: id, name: name, errorReason: errorReason}, null, 2));
+		        	//alert(qx.lang.Json.stringify({id: id, name: name, errorReason: errorReason, xhr: xhr}, null, 2));
+					dialog.Dialog.error(errorReason);
 		        },
 		        
 		        onComplete: qx.lang.Function.bind(function(id, name, responseJSON, xhr) {
@@ -57,8 +64,7 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 							//alert(qx.lang.Json.stringify(resultado, null, 2));
 							//alert(qx.lang.Json.stringify(error, null, 2));
 							
-							imgComodato.setSource("");
-							imgComodato.setSource("services/documentos/comodato_0.jpg");
+							imgComodato.setSource("./services/documentos/comodato_0.jpg" + "?" + Math.random());
 						}, this), "agregar_foto_comodato", p);
 		        	} else {
 		        		//application.popupCargando.ocultarModal();
@@ -68,23 +74,30 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 		};
 		
 		fineUploaderComodato = new qq.FineUploaderBasic(fineUploaderOptionsComodato);
-		*/
 		
 		
 		var fineUploaderOptionsVehiculo = {
 		    // options
-			button: btnSeleccionarVehiculo.getContentElement().getDomElement(),
+			button: lblVehiculo.getContentElement().getDomElement(),
 			autoUpload: true,
+			multiple: false,
 			request: {
 				endpoint: 'services/php-traditional-server-master/endpoint.php'
 			},
+			validation: {
+				allowedExtensions: ['jpeg', 'jpg', 'gif', 'png'],
+				//acceptFiles: "image/png, image/jpeg",
+				acceptFiles: ".jpeg, .jpg, .gif, .png"
+            },
 		    callbacks: {
 		        onSubmit: function(id, name) {
 		        	//application.popupCargando.mostrarModal();
+		        	imgVehiculo.setSource("vehiculos/loading66.gif" + "?" + Math.random());
 		        },
 		        
 		        onError: function(id, name, errorReason, xhr) {
-		        	alert(qx.lang.Json.stringify({id: id, name: name, errorReason: errorReason}, null, 2));
+		        	//alert(qx.lang.Json.stringify({id: id, name: name, errorReason: errorReason, xhr: xhr}, null, 2));
+		        	dialog.Dialog.error(errorReason);
 		        },
 		        
 		        onComplete: qx.lang.Function.bind(function(id, name, responseJSON, xhr) {
@@ -104,8 +117,7 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 							//alert(qx.lang.Json.stringify(resultado, null, 2));
 							//alert(qx.lang.Json.stringify(error, null, 2));
 							
-							imgVehiculo.setSource("");
-							imgVehiculo.setSource("services/documentos/vehiculo_0.jpg");
+							imgVehiculo.setSource("./services/documentos/vehiculo_0.jpg" + "?" + Math.random());
 						}, this), "agregar_foto_vehiculo", p);
 		        	} else {
 		        		//application.popupCargando.ocultarModal();
@@ -142,7 +154,33 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 			
 			cboResponsable.removeAll();
 			cboResponsable.setValue("");
-		} else {
+			
+			
+			
+			var p = {id_vehiculo: datos.id_vehiculo};
+			
+			var rpc = new vehiculos.comp.rpc.Rpc("services/", "comp.Vehiculo");
+			rpc.addListener("completed", function(e){
+				var data = e.getData();
+				
+				imgComodato.setSource("./services/documentos/comodato_0.jpg" + "?" + Math.random());
+				imgVehiculo.setSource("./services/documentos/vehiculo_0.jpg" + "?" + Math.random());
+			}, this);
+			
+			rpc.callAsyncListeners(true, "preparar_foto", p);
+			
+		}
+		
+		modelForm = qx.data.marshal.Json.createModel(datos, true);
+		controllerFormInfoVehiculo.setModel(modelForm);
+	}, this);
+	var popupVehiculo = cboVehiculo.getChildControl("popup");
+	popupVehiculo.addListener("disappear", function(e){
+		var datos, modelForm;
+		
+		txtNro_patente.setValid(true);
+
+		if (! lstVehiculo.isSelectionEmpty()) {
 			this.setCaption("Modificar vehículo");
 			datos = lstVehiculo.getSelection()[0].getUserData("datos");
 			datos.vehiculo.cboDependencia = "";
@@ -163,6 +201,20 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 			}
 			
 			datos = datos.vehiculo;
+			
+			
+			
+			var p = {id_vehiculo: datos.id_vehiculo};
+			
+			var rpc = new vehiculos.comp.rpc.Rpc("services/", "comp.Vehiculo");
+			rpc.addListener("completed", function(e){
+				var data = e.getData();
+				
+				imgComodato.setSource("./services/documentos/comodato_" + datos.id_vehiculo + ".jpg" + "?" + Math.random());
+				imgVehiculo.setSource("./services/documentos/vehiculo_" + datos.id_vehiculo + ".jpg" + "?" + Math.random());
+			}, this);
+			
+			rpc.callAsyncListeners(true, "preparar_foto", p);
 		}
 		
 		modelForm = qx.data.marshal.Json.createModel(datos, true);
@@ -283,66 +335,11 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 	
 
 	
-	// Menu
 	
-	var menuComodato = new componente.comp.ui.ramon.menu.Menu();
-	
-	var btnSeleccionarComodato = new qx.ui.menu.Button("Seleccionar...");
-	btnSeleccionarComodato.addListenerOnce("appear", function(e){
-		var fineUploaderOptionsComodato = {
-		    // options
-			button: btnSeleccionarComodato.getContentElement().getDomElement(),
-			autoUpload: true,
-			request: {
-				endpoint: 'services/php-traditional-server-master/endpoint.php'
-			},
-		    callbacks: {
-		        onSubmit: function(id, name) {
-		        	//application.popupCargando.mostrarModal();
-		        },
-		        
-		        onError: function(id, name, errorReason, xhr) {
-		        	alert(qx.lang.Json.stringify({id: id, name: name, errorReason: errorReason}, null, 2));
-		        },
-		        
-		        onComplete: qx.lang.Function.bind(function(id, name, responseJSON, xhr) {
-		        	//application.popupCargando.ocultarModal();
-		        	
-		        	if (responseJSON.success) {
-		        		var p = {};
-		        		p.uuid = responseJSON.uuid;
-		        		p.uploadName = responseJSON.uploadName;
-		        		
-		        		//alert(qx.lang.Json.stringify(p, null, 2));
-		        		
-						var rpc = new qx.io.remote.Rpc("services/", "comp.Vehiculo");
-						rpc.callAsync(qx.lang.Function.bind(function(resultado, error, id){
-							//application.popupCargando.ocultarModal();
-							
-							//alert(qx.lang.Json.stringify(resultado, null, 2));
-							//alert(qx.lang.Json.stringify(error, null, 2));
-							
-							imgComodato.setSource(null);
-							imgComodato.setSource("./services/documentos/comodato_0.jpg");
-						}, this), "agregar_foto_comodato", p);
-		        	} else {
-		        		//application.popupCargando.ocultarModal();
-		        	}
-		        }, this)
-		    }
-		};
-		
-		fineUploaderComodato = new qq.FineUploaderBasic(fineUploaderOptionsComodato);
-	}, this);
-	
-	btnSeleccionarComodato.addListener("execute", function(e){
-
-	});
-	menuComodato.add(btnSeleccionarComodato);
-	menuComodato.memorizar();
-	
-	var lblComodato = new qx.ui.basic.Label("Foto comodato:");
-	this.add(lblComodato, {right: 190, top: 40});
+	var lblComodato = new qx.ui.basic.Label("Foto comodato...");
+	lblComodato.setPadding(5, 5, 5, 5);
+	lblComodato.setDecorator("main");
+	this.add(lblComodato, {right: 200, top: 40});
 	
 	var imgComodato = new qx.ui.basic.Image();
 	imgComodato.setWidth(180);
@@ -350,27 +347,27 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 	imgComodato.setBackgroundColor("#FFFFFF");
 	imgComodato.setDecorator("main");
 	imgComodato.setScale(true);
-	imgComodato.setContextMenu(menuComodato);
+	imgComodato.addListener("loaded", function(e){
+		imgComodato.abrir = true;
+	});
+	imgComodato.addListener("loadingFailed", function(e){
+		imgComodato.abrir = false;
+	});
+	imgComodato.addListener("tap", function(e){
+		if (imgComodato.abrir) window.open(imgComodato.getSource());
+	});
 	
 	this.add(imgComodato, {right: 10, top: 30});
 	
 	var fineUploaderComodato;
 	
 	
-	
-	// Menu
-	
-	var menuVehiculo = new componente.comp.ui.ramon.menu.Menu();
-	
-	var btnSeleccionarVehiculo = new qx.ui.menu.Button("Seleccionar...");
-	btnSeleccionarVehiculo.addListener("execute", function(e){
 
-	});
-	menuVehiculo.add(btnSeleccionarVehiculo);
-	menuVehiculo.memorizar();
 	
-	var lblVehiculo = new qx.ui.basic.Label("Foto vehículo:");
-	this.add(lblVehiculo, {right: 190, top: 220});
+	var lblVehiculo = new qx.ui.basic.Label("Foto vehículo...");
+	lblVehiculo.setPadding(5, 5, 5, 5);
+	lblVehiculo.setDecorator("main");
+	this.add(lblVehiculo, {right: 200, top: 195});
 	
 	var imgVehiculo = new qx.ui.basic.Image();
 	imgVehiculo.setWidth(180);
@@ -378,7 +375,16 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 	imgVehiculo.setBackgroundColor("#FFFFFF");
 	imgVehiculo.setDecorator("main");
 	imgVehiculo.setScale(true);
-	imgVehiculo.setContextMenu(menuVehiculo);
+	imgVehiculo.addListener("loaded", function(e){
+		imgVehiculo.abrir = true;
+	});
+	imgVehiculo.addListener("loadingFailed", function(e){
+		imgVehiculo.abrir = false;
+	});
+	imgVehiculo.addListener("tap", function(e){
+		if (imgVehiculo.abrir) window.open(imgVehiculo.getSource());
+	});
+	
 	this.add(imgVehiculo, {right: 10, top: 50});
 	
 	var fineUploaderVehiculo;
@@ -455,6 +461,9 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 	
 	btnAceptar.setTabIndex(20);
 	btnCancelar.setTabIndex(21);
+	
+	
+	
 	
 	
 	},

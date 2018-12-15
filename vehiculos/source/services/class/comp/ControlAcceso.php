@@ -39,7 +39,7 @@ class class_ControlAcceso
   	$resultado = array();
   	
 		
-	$sql = "SELECT SYSusuario, sistema_id FROM _sistemas_usuarios WHERE SYSusuario='" . $p->usuario . "' AND sistema_id='AUT'";
+	$sql = "SELECT SYSusuario, sistema_id FROM _sistemas_usuarios WHERE SYSusuario='" . $p->usuario . "' AND sistema_id='017'";
 	$rs = $this->mysqli->query($sql);
 	
 	if ($rs->num_rows == 1) {
@@ -47,6 +47,7 @@ class class_ControlAcceso
 		$sql = "SELECT * FROM _usuarios";
 		$sql.= " LEFT JOIN _organismos_areas_usuarios ON _organismos_areas_usuarios.SYSusuario = _usuarios.SYSusuario";
 		$sql.= " LEFT JOIN _organismos_areas ON _organismos_areas.organismo_area_id = _organismos_areas_usuarios.organismo_area_id";
+		$sql.= " INNER JOIN parque ON BINARY parque.organismo_area_id = BINARY _organismos_areas_usuarios.organismo_area_id";
 		$sql.= " LEFT JOIN _organismos ON _organismos.organismo_id = _organismos_areas.organismo_id";
 		$sql.= " WHERE _usuarios.SYSusuario = BINARY '" . $p->usuario . "' AND _usuarios.SYSpassword = '" . md5($p->password) . "' AND _usuarios.SYSusuario_estado=1";
 		
