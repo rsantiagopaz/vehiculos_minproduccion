@@ -39,7 +39,7 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 		    callbacks: {
 		        onSubmit: function(id, name) {
 		        	//application.popupCargando.mostrarModal();
-		        	imgComodato.setSource("vehiculos/loading66.gif" + "?" + Math.random());
+		        	imgComodato.setSource("./services/documentos/loading66.gif" + "?" + Math.random());
 		        },
 		        
 		        onError: function(id, name, errorReason, xhr) {
@@ -92,7 +92,7 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 		    callbacks: {
 		        onSubmit: function(id, name) {
 		        	//application.popupCargando.mostrarModal();
-		        	imgVehiculo.setSource("vehiculos/loading66.gif" + "?" + Math.random());
+		        	imgVehiculo.setSource("./services/documentos/loading66.gif" + "?" + Math.random());
 		        },
 		        
 		        onError: function(id, name, errorReason, xhr) {
@@ -254,6 +254,7 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 	
 
 	aux = new qx.ui.form.SelectBox();
+	//aux.setRequired(true);
 	var rpc = new vehiculos.comp.rpc.Rpc("services/", "comp.Vehiculo");
 	try {
 		var resultado = rpc.callSync("autocompletarTipo_vehiculo", {texto: ""});
