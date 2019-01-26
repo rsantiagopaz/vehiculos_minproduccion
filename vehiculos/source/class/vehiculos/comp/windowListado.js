@@ -95,6 +95,23 @@ qx.Class.define("vehiculos.comp.windowListado",
 	
 	
 	
+	var rbtA4 = new qx.ui.form.RadioButton("Vehículos");
+	rbtA4.addListener("changeValue", function(e){
+		var data = e.getData();
+
+		if (data) {
+			dtfDesde.setEnabled(false);
+			dtfHasta.setEnabled(false);
+		}
+	});
+	
+	composite.add(rbtA4, {row: 5, column: 0});
+	rgpA.add(rbtA4);
+	
+	
+	
+	
+	
 	var rbtA2 = new qx.ui.form.RadioButton("Incidentes").set({value: true});
 	rbtA2.addListener("changeValue", function(e){
 		var data = e.getData();
@@ -204,7 +221,7 @@ qx.Class.define("vehiculos.comp.windowListado",
 	compositeFecha.add(new qx.ui.basic.Label("Hasta:"));
 	compositeFecha.add(dtfHasta);
 	
-	this.add(compositeFecha, {left: 0, top: 200});
+	this.add(compositeFecha, {left: 0, top: 250});
 	
 	
 	var btnAceptar = new qx.ui.form.Button("Ver");
@@ -259,6 +276,8 @@ qx.Class.define("vehiculos.comp.windowListado",
 				txt = "?rutina=choferes";
 				
 				if (chkDependencia.getValue()) txt+= "&organismo_area_id=" + lstDependencia2.getSelection()[0].getModel();
+			} else if (rbtA4.getValue()) {
+				txt = "?rutina=vehiculos";
 			}
 			
 			if (rbtA1.getValue()) {

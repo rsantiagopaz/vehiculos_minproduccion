@@ -531,7 +531,19 @@ qx.Class.define("vehiculos.comp.pageParticular",
 	aux.setReadOnly(true);
 	aux.setDecorator("main");
 	aux.setBackgroundColor("#ffffc0");
+	formInfoVehiculo.add(aux, "Localidad", null, "localidad");
+	
+	aux = new qx.ui.form.TextField();
+	aux.setReadOnly(true);
+	aux.setDecorator("main");
+	aux.setBackgroundColor("#ffffc0");
 	formInfoVehiculo.add(aux, "Dependencia", null, "dependencia");
+	
+	aux = new qx.ui.form.TextField();
+	aux.setReadOnly(true);
+	aux.setDecorator("main");
+	aux.setBackgroundColor("#ffffc0");
+	formInfoVehiculo.add(aux, "Depositario", null, "depositario");
 	
 	aux = new qx.ui.form.TextField();
 	aux.setReadOnly(true);
@@ -760,6 +772,8 @@ qx.Class.define("vehiculos.comp.pageParticular",
 		if (! selectionModelMovimiento.isSelectionEmpty()) {
 			
 			rowDataMovimiento = tableModelMovimiento.getRowData(tblMovimiento.getFocusedRow());
+			
+			tableModelSal.setDataAsMapArray([], true);
 			
 			btnAsunto.setEnabled(rowDataMovimiento.estado == "S" && rowDataMovimiento.documentacion_id == null);
 			btnAnularEntTaller.setEnabled(rowDataMovimiento.estado == "E");

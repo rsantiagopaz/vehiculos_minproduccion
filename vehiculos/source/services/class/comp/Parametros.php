@@ -19,87 +19,84 @@ class class_Parametros extends class_Base
   	
 	if (is_numeric($p->texto)) {
 		$sql = "SELECT";
-		$sql.= "  id_taller AS model";
-		$sql.= ", CONCAT(taller.cuit, ' (', taller.descrip, ')') AS label";
-		$sql.= ", descrip";
-		$sql.= ", cuit";
-		$sql.= " FROM taller";
-		$sql.= " WHERE cuit LIKE '" . $p->texto . "%'";
+		$sql.= "  razones_sociales.cod_razon_social AS model";
+		$sql.= ", CONCAT(proveedores.cuit, ' (', razones_sociales.razon_social, ')') AS label";
+		$sql.= ", proveedores.cuit";
+		$sql.= ", razones_sociales.razon_social";
+		$sql.= " FROM (proveedores INNER JOIN razones_sociales USING(cod_proveedor)) INNER JOIN taller USING(cod_razon_social)";
+		$sql.= " WHERE proveedores.cuit LIKE '" . $p->texto . "%'";
 		$sql.= " ORDER BY label";
 	} else {
 		$sql = "SELECT * FROM (";
 			$sql.= "(";
 				$sql.= "SELECT";
-				$sql.= "  id_taller AS model";
-				$sql.= ", CONCAT(taller.descrip, ' (', taller.cuit, ')') AS label";
-				$sql.= ", descrip";
-				$sql.= ", cuit";
-				$sql.= " FROM taller";
+				$sql.= "  razones_sociales.cod_razon_social AS model";
+				$sql.= ", CONCAT(razones_sociales.razon_social, ' (', proveedores.cuit, ')') AS label";
+				$sql.= ", proveedores.cuit";
+				$sql.= ", razones_sociales.razon_social";
+				$sql.= " FROM (proveedores INNER JOIN razones_sociales USING(cod_proveedor)) INNER JOIN taller USING(cod_razon_social)";
 			$sql.= ") UNION (";
 				$sql.= "SELECT";
 				$sql.= "  0 AS model";
 				$sql.= ", 'Parque Automotor' AS label";
 				$sql.= ", '' AS cuit";
-				$sql.= ", 'Parque Automotor' AS descrip";
+				$sql.= ", 'Parque Automotor' AS razon_social";
 			$sql.= ")";
 		$sql.= ") AS temporal";
-		$sql.= " WHERE descrip LIKE '%" . $p->texto . "%'";
+		$sql.= " WHERE razon_social LIKE '%" . $p->texto . "%'";
 		$sql.= " ORDER BY label";
 	}
 	
 	return $this->toJson($this->mysqli->query($sql));
   }
+  
+  
+  public function method_autocompletarRazonSocial($params, $error) {
+  	$p = $params[0];
+  	
+	if (is_numeric($p->texto)) {
+		$sql = "SELECT";
+		$sql.= "  razones_sociales.cod_razon_social AS model";
+		$sql.= ", CONCAT(proveedores.cuit, ' (', razones_sociales.razon_social, ')') AS label";
+		$sql.= ", proveedores.cuit";
+		$sql.= ", razones_sociales.razon_social";
+		$sql.= " FROM proveedores INNER JOIN razones_sociales USING(cod_proveedor)";
+		$sql.= " WHERE proveedores.cuit LIKE '" . $p->texto . "%'";
+		$sql.= " ORDER BY label";
+	} else {
+		$sql = "SELECT";
+		$sql.= "  razones_sociales.cod_razon_social AS model";
+		$sql.= ", CONCAT(razones_sociales.razon_social, ' (', proveedores.cuit, ')') AS label";
+		$sql.= ", proveedores.cuit";
+		$sql.= ", razones_sociales.razon_social";
+		$sql.= " FROM proveedores INNER JOIN razones_sociales USING(cod_proveedor)";
+		$sql.= " WHERE razones_sociales.razon_social LIKE '%" . $p->texto . "%'";
+		$sql.= " ORDER BY label";
+	}
+	
+	return $this->toJson($sql);
+  }
 
   
   
   public function method_leer_taller($params, $error) {
-  	$p = $params[0];
-  	
-	$sql = "SELECT * FROM taller WHERE id_taller=" . $p->id_taller;
-	$rs = $this->mysqli->query($sql);
-	$row = $rs->fetch_object();
+	$sql = "SELECT";
+	$sql.= "  cod_razon_social";
+	$sql.= ", CONCAT(razones_sociales.razon_social, ' (', proveedores.cuit, ')') AS descrip";
+	$sql.= " FROM (taller LEFT JOIN razones_sociales USING(cod_razon_social)) LEFT JOIN proveedores USING(cod_proveedor)";
+	$sql.= " ORDER BY descrip";
 	
-	return $row;
+	return $this->toJson($sql);
   }
   
   
-  public function method_alta_modifica_taller($params, $error) {
+  public function method_agregar_taller($params, $error) {
   	$p = $params[0];
   	
-  	$sql = "SELECT id_taller FROM taller WHERE descrip='" . $p->model->descrip . "' AND id_taller <> " . $p->model->id_taller;
-  	$rs = $this->mysqli->query($sql);
-  	if ($rs->num_rows > 0) {
-  		$error->SetError(0, "descrip");
-  		return $error;
-  	}
-
-  	$sql = "SELECT id_taller FROM taller WHERE cuit='" . $p->model->cuit . "' AND id_taller <> " . $p->model->id_taller;
-  	$rs = $this->mysqli->query($sql);
-  	if ($rs->num_rows > 0) {
-  		$error->SetError(0, "cuit");
-  		return $error;
-  	}
-  	
-
-	$id_taller = $p->model->id_taller;
+	$sql = "INSERT taller SET cod_razon_social=" . $p->cod_razon_social;
+	$this->mysqli->query($sql);
 	
-	$set = $this->prepararCampos($p->model, "taller");
-		
-	if ($id_taller == "0") {
-		$sql = "INSERT taller SET " . $set;
-		$this->mysqli->query($sql);
-		
-		$id_taller = $this->mysqli->insert_id;
-		
-		$this->auditoria($sql, $id_taller, "insert_taller");
-	} else {
-		$sql = "UPDATE taller SET " . $set . " WHERE id_taller=" . $id_taller;
-		$this->mysqli->query($sql);
-		
-		$this->auditoria($sql, $id_taller, "update_taller");
-	}
-	
-	return $id_taller;
+	$this->auditoria($sql, $p->cod_razon_social, "insert_taller");
   }
   
   
@@ -142,6 +139,15 @@ class class_Parametros extends class_Base
 	}
 	
 	return $resultado;
+  }
+  
+  
+  public function method_autocompletarLocalidad($params, $error) {
+  	$p = $params[0];
+
+	$sql = "SELECT CONCAT(localidad, ' (', departamento, ')') AS label, localidad_id AS model FROM _localidades INNER JOIN _departamentos USING(departamento_id) WHERE localidad LIKE '%" . $p->texto . "%' ORDER BY label";
+	
+	return $this->toJson($sql);
   }
 }
 

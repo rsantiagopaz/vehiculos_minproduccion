@@ -9,7 +9,7 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 		caption: "Nuevo vehículo",
 		//width: 460,
 		width: 800,
-		height: 520,
+		height: 550,
 		showMinimize: false,
 		showMaximize: false,
 		allowMaximize: false,
@@ -147,7 +147,7 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 		if (lstVehiculo.isSelectionEmpty()) {
 			this.setCaption("Nuevo vehículo");
 			
-			datos = {nro_patente: "", marca: "", id_tipo_vehiculo: null, modelo: "", nro_motor: "", nro_chasis: "", observa: "", nro_poliza: "", id_responsable: "0", cboDependencia: "", cboResponsable: "", organismo_area_id: null, id_vehiculo: "0"};
+			datos = {id_vehiculo: "0", nro_patente: "", marca: "", id_tipo_vehiculo: null, modelo: "", nro_motor: "", nro_chasis: "", observa: "", nro_poliza: "", localidad_id: null, id_dependencia: null, id_depositario: null, id_responsable: null, cboLocalidad: "", cboDependencia: "", cboDepositario: "", cboResponsable: ""};
 			
 			cboDependencia.removeAll();
 			cboDependencia.setValue("");
@@ -183,14 +183,30 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 		if (! lstVehiculo.isSelectionEmpty()) {
 			this.setCaption("Modificar vehículo");
 			datos = lstVehiculo.getSelection()[0].getUserData("datos");
+			datos.vehiculo.cboLocalidad = "";
 			datos.vehiculo.cboDependencia = "";
+			datos.vehiculo.cboDepositario = "";
 			datos.vehiculo.cboResponsable = "";
+			
+			if (datos.cboLocalidad == null) {
+				cboLocalidad.removeAll();
+				cboLocalidad.setValue("");
+			} else {
+				cboLocalidad.add(new qx.ui.form.ListItem(datos.cboLocalidad.label, null, datos.cboLocalidad.model));
+			}
 			
 			if (datos.cboDependencia == null) {
 				cboDependencia.removeAll();
 				cboDependencia.setValue("");
 			} else {
 				cboDependencia.add(new qx.ui.form.ListItem(datos.cboDependencia.label, null, datos.cboDependencia.model));
+			}
+			
+			if (datos.cboDepositario == null) {
+				cboDepositario.removeAll();
+				cboDepositario.setValue("");
+			} else {
+				cboDepositario.add(new qx.ui.form.ListItem(datos.cboDepositario.label, null, datos.cboDepositario.model));
 			}
 			
 			if (datos.cboResponsable == null) {
@@ -306,13 +322,30 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 	formInfoVehiculo.add(aux, "Nro.seguro/póliza", null, "nro_poliza", null, {item: {row: 8, column: 1, colSpan: 6}});
 	
 	
+	var cboLocalidad = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Parametros", methodName: "autocompletarLocalidad"});
+	formInfoVehiculo.add(cboLocalidad, "Localidad", function(value) {
+		if (lstLocalidad.isSelectionEmpty()) throw new qx.core.ValidationError("Validation Error", "Debe seleccionar localidad");
+	}, "cboLocalidad", null, {item: {row: 9, column: 1, colSpan: 13}});
+	var lstLocalidad = cboLocalidad.getChildControl("list");
+	formInfoVehiculo.add(lstLocalidad, "", null, "localidad_id");
+	
+	
 	var cboDependencia = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Vehiculo", methodName: "autocompletarDependencia"});
 	cboDependencia.setRequired(true);
 	formInfoVehiculo.add(cboDependencia, "Dependencia", function(value) {
 		if (lstDependencia.isSelectionEmpty()) throw new qx.core.ValidationError("Validation Error", "Debe seleccionar dependencia");
-	}, "cboDependencia", null, {item: {row: 9, column: 1, colSpan: 13}});
+	}, "cboDependencia", null, {item: {row: 10, column: 1, colSpan: 13}});
 	var lstDependencia = cboDependencia.getChildControl("list");
-	formInfoVehiculo.add(lstDependencia, "", null, "organismo_area_id");
+	formInfoVehiculo.add(lstDependencia, "", null, "id_dependencia");
+	
+	
+	var cboDepositario = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Vehiculo", methodName: "autocompletarDepositario"});
+	cboDepositario.setRequired(true);
+	formInfoVehiculo.add(cboDepositario, "Depositario", function(value) {
+		if (lstDepositario.isSelectionEmpty()) throw new qx.core.ValidationError("Validation Error", "Debe seleccionar depositario");
+	}, "cboDepositario", null, {item: {row: 11, column: 1, colSpan: 13}});
+	var lstDepositario = cboDepositario.getChildControl("list");
+	formInfoVehiculo.add(lstDepositario, "", null, "id_depositario");
 	
 	
 
@@ -320,7 +353,7 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 	cboResponsable.setRequired(true);
 	formInfoVehiculo.add(cboResponsable, "Responsable", function(value) {
 		if (lstResponsable.isSelectionEmpty()) throw new qx.core.ValidationError("Validation Error", "Debe seleccionar responsable");
-	}, "cboResponsable", null, {item: {row: 10, column: 1, colSpan: 13}});
+	}, "cboResponsable", null, {item: {row: 12, column: 1, colSpan: 13}});
 	var lstResponsable = cboResponsable.getChildControl("list");
 	formInfoVehiculo.add(lstResponsable, "", null, "id_responsable");
 

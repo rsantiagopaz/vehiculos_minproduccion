@@ -146,15 +146,6 @@ qx.Class.define("vehiculos.comp.windowResponsable",
 	form.add(aux, "Organización", null, "organizacion", null, {item: {row: 7, column: 1, colSpan: 13}});
 	
 	
-	var cboDependencia = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Vehiculo", methodName: "autocompletarDependencia"});
-	//cboDependencia.setRequired(true);
-	//form.add(cboDependencia, "Dependencia", function(value) {
-		//if (lstDependencia.isSelectionEmpty()) throw new qx.core.ValidationError("Validation Error", "Debe seleccionar dependencia");
-	//}, "cboDependencia", null, {item: {row: 7, column: 1, colSpan: 13}});
-	var lstDependencia = cboDependencia.getChildControl("list");
-	//form.add(lstDependencia, "", null, "organismo_area_id");
-	
-
 
 
 	

@@ -181,7 +181,7 @@ class class_Vehiculo extends class_Base
   	if ($rowEntsal->estado == $p->entsal_estado) {
 		$this->mysqli->query("START TRANSACTION");
 	
-		$sql = "INSERT movimiento SET id_entsal=" . $p->id_entsal . ", id_taller=" . $p->id_taller . ", observa='" . $p->observa . "', f_ent=NOW(), id_usuario_ent='" . $_SESSION['login']->usuario . "', estado='E'";
+		$sql = "INSERT movimiento SET id_entsal=" . $p->id_entsal . ", cod_razon_social=" . $p->cod_razon_social . ", observa='" . $p->observa . "', f_ent=NOW(), id_usuario_ent='" . $_SESSION['login']->usuario . "', estado='E'";
 		$this->mysqli->query($sql);
 		$insert_id = $this->mysqli->insert_id;
 		
@@ -243,15 +243,15 @@ class class_Vehiculo extends class_Base
 	
 	
 	$sql = "SELECT * FROM (";
-	$sql.= "(SELECT movimiento.*, taller.descrip AS taller FROM movimiento LEFT JOIN taller USING(id_taller))";
+	$sql.= "(SELECT movimiento.*, razones_sociales.razon_social AS taller FROM movimiento LEFT JOIN razones_sociales USING(cod_razon_social))";
 	$sql.= " UNION ALL";
-	$sql.= "(SELECT movimiento.*, temporal_1.descrip AS taller FROM movimiento INNER JOIN ";
+	$sql.= "(SELECT movimiento.*, temporal_1.razon_social AS taller FROM movimiento INNER JOIN ";
 		$sql.= "(";
 		$sql.= "SELECT";
-		$sql.= "  0 AS id_taller";
-		$sql.= ", 'Parque Automotor' AS descrip";
+		$sql.= "  0 AS cod_razon_social";
+		$sql.= ", 'Parque Automotor' AS razon_social";
 		$sql.= ") AS temporal_1";
-	$sql.= " USING(id_taller))";
+	$sql.= " USING(cod_razon_social))";
 	$sql.= ") AS temporal_2";
 	$sql.= " WHERE id_entsal=" . $p->id_entsal;
 	$sql.= " ORDER BY f_ent DESC";
@@ -363,10 +363,26 @@ class class_Vehiculo extends class_Base
 	while ($row = $rs->fetch_object()) {
 		$row->total = (float) $row->total;
 		
+		
+		
 		$sql = "SELECT";
-		$sql.= "  CONCAT(_organismos_areas.organismo_area, ' (', _organismos.organismo, ')') AS label";
-		$sql.= " FROM (_organismos_areas INNER JOIN _organismos USING(organismo_id))";
-		$sql.= " WHERE _organismos_areas.organismo_area_id='" . $row->organismo_area_id . "'";
+		$sql.= " CONCAT(localidad, ' (', departamento, ')') AS label";
+		$sql.= " FROM _localidades INNER JOIN _departamentos USING(departamento_id)";
+		$sql.= " WHERE localidad_id='" . $row->localidad_id . "'";
+		
+		$rsAux = $this->mysqli->query($sql);
+		if ($rsAux->num_rows > 0) {
+			$rowAux = $rsAux->fetch_object();
+			$row->localidad = $rowAux->label;
+		} else {
+			$row->localidad = "";
+		}
+		
+		
+		$sql = "SELECT";
+		$sql.= " descrip AS label";
+		$sql.= " FROM dependencia";
+		$sql.= " WHERE id_dependencia='" . $row->id_dependencia . "'";
 		
 		$rsDependencia = $this->mysqli->query($sql);
 		if ($rsDependencia->num_rows > 0) {
@@ -374,6 +390,21 @@ class class_Vehiculo extends class_Base
 			$row->dependencia = $rowDependencia->label;
 		} else {
 			$row->dependencia = "";
+		}
+		
+		
+		
+		$sql = "SELECT";
+		$sql.= " descrip AS label";
+		$sql.= " FROM depositario";
+		$sql.= " WHERE id_depositario='" . $row->id_depositario . "'";
+		
+		$rsAux = $this->mysqli->query($sql);
+		if ($rsAux->num_rows > 0) {
+			$rowAux = $rsAux->fetch_object();
+			$row->depositario = $rowAux->label;
+		} else {
+			$row->depositario = "";
 		}
 		
 		
@@ -471,16 +502,16 @@ class class_Vehiculo extends class_Base
   	$asu = 0;
   	$dif = 0;
  	
-	$sql = "SELECT id_entsal, organismo_area_id, nro_patente, CONCAT(nro_patente, '  ', marca) AS vehiculo, f_ent, f_sal, asunto, entsal.estado, entsal.diferido FROM entsal INNER JOIN vehiculo USING(id_vehiculo) WHERE vehiculo.id_parque=" . $_SESSION['parque']->id_parque . " AND entsal.estado<>'A' AND (entsal.estado='E' OR entsal.estado='T' OR entsal.asunto OR entsal.diferido) ORDER BY f_ent DESC";
+	$sql = "SELECT id_entsal, id_dependencia, nro_patente, CONCAT(nro_patente, '  ', marca) AS vehiculo, f_ent, f_sal, asunto, entsal.estado, entsal.diferido FROM entsal INNER JOIN vehiculo USING(id_vehiculo) WHERE vehiculo.id_parque=" . $_SESSION['parque']->id_parque . " AND entsal.estado<>'A' AND (entsal.estado='E' OR entsal.estado='T' OR entsal.asunto OR entsal.diferido) ORDER BY f_ent DESC";
 	$rs = $this->mysqli->query($sql);
 	while ($row = $rs->fetch_object()) {
 		$row->asunto = (bool) $row->asunto;
 		$row->diferido = (bool) $row->diferido;
 		
 		$sql = "SELECT";
-		$sql.= "  CONCAT(_organismos_areas.organismo_area, ' (', _organismos.organismo, ')') AS label";
-		$sql.= " FROM (_organismos_areas INNER JOIN _organismos USING(organismo_id))";
-		$sql.= " WHERE _organismos_areas.organismo_area_id='" . $row->organismo_area_id . "'";
+		$sql.= "  descrip AS label";
+		$sql.= " FROM dependencia";
+		$sql.= " WHERE id_dependencia='" . $row->id_dependencia . "'";
 		
 		$rsDependencia = $this->mysqli->query($sql);
 		if ($rsDependencia->num_rows > 0) {
@@ -507,7 +538,7 @@ class class_Vehiculo extends class_Base
 		} else if ($p->ver == "Diferido" && $row->diferido) {
 			$resultado->gral[] = $row;
 		} else if (is_numeric($p->ver)) {
-			$sql = "SELECT id_movimiento FROM movimiento WHERE id_entsal=" . $row->id_entsal . " AND estado <> 'A' AND id_taller=" . $p->ver;
+			$sql = "SELECT id_movimiento FROM movimiento WHERE id_entsal=" . $row->id_entsal . " AND estado <> 'A' AND cod_razon_social=" . $p->ver;
 			$rsMovimiento = $this->mysqli->query($sql);
 			if ($rsMovimiento->num_rows > 0) $resultado->gral[] = $row;
 		}
@@ -655,24 +686,47 @@ class class_Vehiculo extends class_Base
 		$rowAux->label = $row->nro_patente . "  " . $row->marca;
 		
 		$rowAux->vehiculo = $row;
+		
+		
+		
+		$sql = "SELECT";
+		$sql.= "  CONCAT(localidad, ' (', departamento, ')') AS label";
+		$sql.= "  , localidad_id AS model";
+		$sql.= " FROM _localidades INNER JOIN _departamentos USING(departamento_id)";
+		$sql.= " WHERE localidad_id='" . $row->localidad_id . "'";
+		
+		$rsAux = $this->mysqli->query($sql);
+		if ($rsAux->num_rows > 0) $rowAux->cboLocalidad = $rsAux->fetch_object();
+		
 
 		
 		$sql = "SELECT";
-		$sql.= "  CONCAT(_organismos_areas.organismo_area, ' (', _organismos.organismo, ')') AS label";
-		$sql.= "  , _organismos_areas.organismo_area_id AS model";
-		$sql.= " FROM (_organismos_areas INNER JOIN _organismos USING(organismo_id))";
-		$sql.= " WHERE _organismos_areas.organismo_area_id='" . $row->organismo_area_id . "'";
+		$sql.= "  descrip AS label";
+		$sql.= "  , id_dependencia AS model";
+		$sql.= " FROM dependencia";
+		$sql.= " WHERE id_dependencia='" . $row->id_dependencia . "'";
 		
-		$rsDependencia = $this->mysqli->query($sql);
-		if ($rsDependencia->num_rows > 0) $rowAux->cboDependencia = $rsDependencia->fetch_object();
+		$rsAux = $this->mysqli->query($sql);
+		if ($rsAux->num_rows > 0) $rowAux->cboDependencia = $rsAux->fetch_object();
+		
+		
+		
+		$sql = "SELECT";
+		$sql.= "  descrip AS label";
+		$sql.= "  , id_depositario AS model";
+		$sql.= " FROM depositario";
+		$sql.= " WHERE id_depositario='" . $row->id_depositario . "'";
+		
+		$rsAux = $this->mysqli->query($sql);
+		if ($rsAux->num_rows > 0) $rowAux->cboDepositario = $rsAux->fetch_object();
 		
 		
 		
 		
 		$sql = "SELECT id_responsable AS model, CONCAT(apenom, ' - ', dni) AS label FROM responsable WHERE id_responsable='" . $row->id_responsable . "'";
 		
-		$rsResponsable = $this->mysqli->query($sql);
-		if ($rsResponsable->num_rows > 0) $rowAux->cboResponsable = $rsResponsable->fetch_object();
+		$rsAux = $this->mysqli->query($sql);
+		if ($rsAux->num_rows > 0) $rowAux->cboResponsable = $rsAux->fetch_object();
 		
 		
 
@@ -695,14 +749,21 @@ class class_Vehiculo extends class_Base
   
   public function method_autocompletarDependencia($params, $error) {
   	$p = $params[0];
-  	
-	//$sql = " (SELECT _organismos_areas.organismo_area_id AS model, CONCAT(_organismos_areas.organismo_area, ' (', _departamentos.departamento, ')') AS label FROM _organismos_areas INNER JOIN _departamentos ON _organismos_areas.organismo_areas_id_departamento=_departamentos.codigo_indec WHERE _organismos_areas.organismo_area_tipo_id='E' AND _departamentos.provincia_id=21 AND _organismos_areas.organismo_area LIKE '%" . $p->texto . "%')";
-	//$sql.= " UNION DISTINCT";
 	
-	$sql= " (SELECT _organismos_areas.organismo_area_id AS model, CONCAT(_organismos_areas.organismo_area, ' (', _organismos.organismo, ')') AS label FROM _organismos_areas INNER JOIN _organismos USING(organismo_id) WHERE _organismos_areas.organismo_area_tipo_id<>'E' AND (_organismos_areas.organismo_id='33' OR _organismos_areas.organismo_id='54') AND _organismos_areas.organismo_area LIKE '%" . $p->texto . "%')";
-	$sql.= " ORDER BY label";
+	$sql = "SELECT id_dependencia AS model, descrip AS label FROM dependencia WHERE descrip LIKE'%" . $p->texto . "%' ORDER BY label";
+	
 	return $this->toJson($this->mysqli->query($sql));
   }
+  
+  
+  public function method_autocompletarDepositario($params, $error) {
+  	$p = $params[0];
+  	
+	$sql = "SELECT id_depositario AS model, descrip AS label FROM depositario WHERE descrip LIKE'%" . $p->texto . "%' ORDER BY label";
+	
+	return $this->toJson($this->mysqli->query($sql));
+  }
+  
   
   
   public function method_autocompletarUnipresu($params, $error) {

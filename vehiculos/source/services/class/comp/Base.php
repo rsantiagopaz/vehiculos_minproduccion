@@ -9,6 +9,8 @@ class class_Base
 		
 		set_time_limit(0);
 		
+		date_default_timezone_set("America/Argentina/Buenos_Aires");
+		
 		if ( $this->is_session_started() === false ) session_start();
 		
 		

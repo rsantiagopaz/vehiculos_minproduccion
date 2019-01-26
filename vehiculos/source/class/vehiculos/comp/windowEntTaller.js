@@ -36,7 +36,7 @@ qx.Class.define("vehiculos.comp.windowEntTaller",
 
 	form.add(cboTaller, "Taller", function(value) {
 		if (lstTaller.isSelectionEmpty()) throw new qx.core.ValidationError("Validation Error", "Debe seleccionar taller");
-	}, "id_taller", null, {grupo: 1, item: {row: 1, column: 1, colSpan: 11}});
+	}, "cod_razon_social", null, {grupo: 1, item: {row: 1, column: 1, colSpan: 11}});
 	
 	var txtObserva = new qx.ui.form.TextArea("");
 	txtObserva.setRequired(true);
@@ -58,9 +58,11 @@ qx.Class.define("vehiculos.comp.windowEntTaller",
 			var p = {};
 			p.id_vehiculo = vehiculo.id_vehiculo;
 			p.id_entsal = rowDataEntSal.id_entsal;
-			p.id_taller = lstTaller.getModelSelection().getItem(0);
+			p.cod_razon_social = lstTaller.getModelSelection().getItem(0);
 			p.observa = txtObserva.getValue();
 			p.entsal_estado = rowDataEntSal.estado;
+			
+			//alert(qx.lang.Json.stringify(p, null, 2));
 			
 			var rpc = new vehiculos.comp.rpc.Rpc("services/", "comp.Vehiculo");
 			rpc.addListener("completed", function(e){
@@ -71,6 +73,10 @@ qx.Class.define("vehiculos.comp.windowEntTaller",
 				this.fireDataEvent("aceptado", data.result);
 			}, this);
 			rpc.addListener("failed", function(e){
+				var data = e.getData();
+				
+				//alert(qx.lang.Json.stringify(data, null, 2));
+				
 				btnCancelar.execute();
 				
 				this.fireDataEvent("estado");

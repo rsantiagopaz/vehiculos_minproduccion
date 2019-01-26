@@ -9,6 +9,8 @@ set_time_limit(0);
 $mysqli = new mysqli("$servidor", "$usuario", "$password", "$base");
 $mysqli->query("SET NAMES 'utf8'");
 
+date_default_timezone_set("America/Argentina/Buenos_Aires");
+
 switch ($_REQUEST['rutina'])
 {
 	
@@ -36,17 +38,17 @@ case "general" : {
 			$sql = "SELECT * FROM (";
 				$sql.= "(";
 					$sql.= "SELECT";
-					$sql.= "  id_taller AS model";
-					$sql.= ", CONCAT(descrip, ' (', cuit, ')') AS label";
-					$sql.= ", cuit";
-					$sql.= ", descrip";
-					$sql.= " FROM taller";
+					$sql.= "  razones_sociales.cod_razon_social AS model";
+					$sql.= ", CONCAT(razones_sociales.razon_social, ' (', proveedores.cuit, ')') AS label";
+					$sql.= ", proveedores.cuit";
+					$sql.= ", razones_sociales.razon_social";
+					$sql.= " FROM (proveedores INNER JOIN razones_sociales USING(cod_proveedor)) INNER JOIN taller USING(cod_razon_social)";
 				$sql.= ") UNION (";
 					$sql.= "SELECT";
 					$sql.= "  0 AS model";
 					$sql.= ", 'Parque Automotor' AS label";
 					$sql.= ", '' AS cuit";
-					$sql.= ", 'Parque Automotor' AS descrip";
+					$sql.= ", 'Parque Automotor' AS razon_social";
 				$sql.= ")";
 			$sql.= ") AS temporal";
 			$sql.= " WHERE model=" . $_REQUEST['ver'];
@@ -102,15 +104,15 @@ case "general" : {
 		if ($item->estado == "T") {
 
 			$sql = "SELECT * FROM(";
-			$sql.= "(SELECT movimiento.*, taller.descrip AS taller FROM movimiento INNER JOIN taller USING(id_taller))";
+			$sql.= "(SELECT movimiento.*, razones_sociales.razon_social AS taller FROM movimiento INNER JOIN razones_sociales USING(cod_razon_social))";
 			$sql.= " UNION ALL";
-			$sql.= "(SELECT movimiento.*, temporal_1.descrip AS taller FROM movimiento INNER JOIN ";
+			$sql.= "(SELECT movimiento.*, temporal_1.razon_social AS taller FROM movimiento INNER JOIN ";
 				$sql.= "(";
 				$sql.= "SELECT";
-				$sql.= "  0 AS id_taller";
-				$sql.= ", 'Parque Automotor' AS descrip";
+				$sql.= "  0 AS cod_razon_social";
+				$sql.= ", 'Parque Automotor' AS razon_social";
 				$sql.= ") AS temporal_1";
-			$sql.= " USING(id_taller))";
+			$sql.= " USING(cod_razon_social))";
 			$sql.= ") AS temporal_2";
 			$sql.= " WHERE id_entsal=" . $item->id_entsal . " AND estado='E'";
 			$sql.= " ORDER BY f_ent DESC";
@@ -219,15 +221,15 @@ case "gastos" : {
 
 	
 	$sql = "SELECT * FROM(";
-	$sql.= "(SELECT movimiento.*, taller.descrip AS taller, entsal.cod_up, vehiculo.nro_patente, vehiculo.marca FROM (((movimiento INNER JOIN taller USING(id_taller)) INNER JOIN entsal USING(id_entsal)) INNER JOIN vehiculo USING(id_vehiculo))";
+	$sql.= "(SELECT movimiento.*, razones_sociales.razon_social AS taller, entsal.cod_up, vehiculo.nro_patente, vehiculo.marca, CONCAT(REPLACE(unipresu.codigo, '-', ''), ' - ', unipresu.nombre) AS up FROM (((movimiento INNER JOIN razones_sociales USING(cod_razon_social)) INNER JOIN entsal USING(id_entsal)) INNER JOIN vehiculo USING(id_vehiculo)) LEFT JOIN unipresu USING(cod_up))";
 	$sql.= " UNION ALL";
-	$sql.= "(SELECT movimiento.*, temporal_1.descrip AS taller, entsal.cod_up, vehiculo.nro_patente, vehiculo.marca FROM (((movimiento INNER JOIN ";
+	$sql.= "(SELECT movimiento.*, temporal_1.razon_social AS taller, entsal.cod_up, vehiculo.nro_patente, vehiculo.marca, CONCAT(REPLACE(unipresu.codigo, '-', ''), ' - ', unipresu.nombre) AS up FROM (((movimiento INNER JOIN ";
 		$sql.= "(";
 		$sql.= "SELECT";
-		$sql.= "  0 AS id_taller";
-		$sql.= ", 'Parque Automotor' AS descrip";
+		$sql.= "  0 AS cod_razon_social";
+		$sql.= ", 'Parque Automotor' AS razon_social";
 		$sql.= ") AS temporal_1";
-	$sql.= " USING(id_taller)) INNER JOIN entsal USING(id_entsal)) INNER JOIN vehiculo USING(id_vehiculo))";
+	$sql.= " USING(cod_razon_social)) INNER JOIN entsal USING(id_entsal)) INNER JOIN vehiculo USING(id_vehiculo)) LEFT JOIN unipresu USING(cod_up))";
 	$sql.= ") AS temporal_2";
 	$sql.= " WHERE estado='S'";
 	
@@ -413,7 +415,7 @@ case "choferes" : {
 	<tr><td align="center" colspan="6"><big><?php echo date("Y-m-d H:i:s"); ?></big></td></tr>
 	<tr><td>&nbsp;</td></tr>
 	<?php
-	if (! is_null($_REQUEST['organismo_area_id'])) {
+	if (isset($_REQUEST['organismo_area_id'])) {
 		$sql = "SELECT";
 		$sql.= "  CONCAT(_organismos_areas.organismo_area, ' (', _organismos.organismo, ')') AS label";
 		$sql.= "  , _organismos_areas.organismo_area_id AS model";
@@ -447,7 +449,7 @@ case "choferes" : {
 	
 	$sql = "SELECT * FROM chofer";
 	$sql.= " WHERE TRUE";
-	if (! is_null($_REQUEST['organismo_area_id'])) $sql.= " AND organismo_area_id='" . $_REQUEST['organismo_area_id'] . "'";
+	if (isset($_REQUEST['organismo_area_id'])) $sql.= " AND organismo_area_id='" . $_REQUEST['organismo_area_id'] . "'";
 	$sql.= " ORDER BY apenom";
 	
 	
@@ -508,9 +510,9 @@ case "historial" : {
 	$rowVehiculo = $rsVehiculo->fetch_object();
 	
 	$sql = "SELECT";
-	$sql.= "  CONCAT(_organismos_areas.organismo_area, ' (', _organismos.organismo, ')') AS label";
-	$sql.= " FROM (_organismos_areas INNER JOIN _organismos USING(organismo_id))";
-	$sql.= " WHERE _organismos_areas.organismo_area_id='" . $rowVehiculo->organismo_area_id . "'";
+	$sql.= " descrip AS label";
+	$sql.= " FROM dependencia";
+	$sql.= " WHERE id_dependencia='" . $rowVehiculo->id_dependencia . "'";
 	
 	$rsDependencia = $mysqli->query($sql);
 	if ($rsDependencia->num_rows > 0) {
@@ -563,15 +565,15 @@ case "historial" : {
 		
 		
 		$sql = "SELECT * FROM(";
-		$sql.= "(SELECT movimiento.*, taller.descrip AS taller FROM movimiento LEFT JOIN taller USING(id_taller))";
+		$sql.= "(SELECT movimiento.*, razones_sociales.razon_social AS taller FROM movimiento LEFT JOIN razones_sociales USING(cod_razon_social))";
 		$sql.= " UNION ALL";
-		$sql.= "(SELECT movimiento.*, temporal_1.descrip AS taller FROM movimiento INNER JOIN ";
+		$sql.= "(SELECT movimiento.*, temporal_1.razon_social AS taller FROM movimiento INNER JOIN ";
 			$sql.= "(";
 			$sql.= "SELECT";
-			$sql.= "  0 AS id_taller";
-			$sql.= ", 'Parque Automotor' AS descrip";
+			$sql.= "  0 AS cod_razon_social";
+			$sql.= ", 'Parque Automotor' AS razon_social";
 			$sql.= ") AS temporal_1";
-		$sql.= " USING(id_taller))";
+		$sql.= " USING(cod_razon_social))";
 		$sql.= ") AS temporal_2";
 		$sql.= " WHERE estado<>'A' AND id_entsal=" . $rowEntsal->id_entsal;
 		$sql.= " ORDER BY f_ent DESC";
@@ -643,9 +645,9 @@ case "salida_vehiculo" : {
 	$rowEntsal = $rsEntsal->fetch_object();
 	
 	$sql = "SELECT";
-	$sql.= "  CONCAT(_organismos_areas.organismo_area, ' (', _organismos.organismo, ')') AS label";
-	$sql.= " FROM (_organismos_areas INNER JOIN _organismos USING(organismo_id))";
-	$sql.= " WHERE _organismos_areas.organismo_area_id='" . $rowEntsal->organismo_area_id . "'";
+	$sql.= " descrip AS label";
+	$sql.= " FROM dependencia";
+	$sql.= " WHERE id_dependencia='" . $rowEntsal->id_dependencia . "'";
 	
 	$rsDependencia = $mysqli->query($sql);
 	if ($rsDependencia->num_rows > 0) {
@@ -685,15 +687,15 @@ case "salida_vehiculo" : {
 	
 	
 	$sql = "SELECT * FROM(";
-	$sql.= "(SELECT movimiento.*, taller.descrip AS taller FROM movimiento INNER JOIN taller USING(id_taller))";
+	$sql.= "(SELECT movimiento.*, razones_sociales.razon_social AS taller FROM movimiento INNER JOIN razones_sociales USING(cod_razon_social))";
 	$sql.= " UNION ALL";
-	$sql.= "(SELECT movimiento.*, temporal_1.descrip AS taller FROM movimiento INNER JOIN ";
+	$sql.= "(SELECT movimiento.*, temporal_1.razon_social AS taller FROM movimiento INNER JOIN ";
 		$sql.= "(";
 		$sql.= "SELECT";
-		$sql.= "  0 AS id_taller";
-		$sql.= ", 'Parque Automotor' AS descrip";
+		$sql.= "  0 AS cod_razon_social";
+		$sql.= ", 'Parque Automotor' AS razon_social";
 		$sql.= ") AS temporal_1";
-	$sql.= " USING(id_taller))";
+	$sql.= " USING(cod_razon_social))";
 	$sql.= ") AS temporal_2";
 
 	if (! isset($_REQUEST['id_movimiento'])) {
@@ -767,9 +769,9 @@ case "entrada_taller" : {
 	$rowEntsal = $rsEntsal->fetch_object();
 	
 	$sql = "SELECT";
-	$sql.= "  CONCAT(_organismos_areas.organismo_area, ' (', _organismos.organismo, ')') AS label";
-	$sql.= " FROM (_organismos_areas INNER JOIN _organismos USING(organismo_id))";
-	$sql.= " WHERE _organismos_areas.organismo_area_id='" . $rowEntsal->organismo_area_id . "'";
+	$sql.= " descrip AS label";
+	$sql.= " FROM dependencia";
+	$sql.= " WHERE id_dependencia='" . $rowEntsal->id_dependencia . "'";
 	
 	$rsDependencia = $mysqli->query($sql);
 	if ($rsDependencia->num_rows > 0) {
@@ -782,15 +784,15 @@ case "entrada_taller" : {
 	
 	
 	$sql = "SELECT * FROM(";
-	$sql.= "(SELECT movimiento.*, taller.descrip AS taller FROM movimiento INNER JOIN taller USING(id_taller))";
+	$sql.= "(SELECT movimiento.*, razones_sociales.razon_social AS taller FROM movimiento INNER JOIN razones_sociales USING(cod_razon_social))";
 	$sql.= " UNION ALL";
-	$sql.= "(SELECT movimiento.*, temporal_1.descrip AS taller FROM movimiento INNER JOIN ";
+	$sql.= "(SELECT movimiento.*, temporal_1.razon_social AS taller FROM movimiento INNER JOIN ";
 		$sql.= "(";
 		$sql.= "SELECT";
-		$sql.= "  0 AS id_taller";
-		$sql.= ", 'Parque Automotor' AS descrip";
+		$sql.= "  0 AS cod_razon_social";
+		$sql.= ", 'Parque Automotor' AS razon_social";
 		$sql.= ") AS temporal_1";
-	$sql.= " USING(id_taller))";
+	$sql.= " USING(cod_razon_social))";
 	$sql.= ") AS temporal_2";
 	$sql.= " WHERE id_movimiento=" . $_REQUEST['id_movimiento'];
 	$sql.= " ORDER BY f_ent DESC";
@@ -1009,6 +1011,96 @@ case "producto_falta" : {
 	?>
 	</table>
 	</td></tr>
+	</table>
+	</body>
+	</html>
+	<?php
+	
+break;
+}
+
+
+
+
+case "vehiculos" : {
+	
+	?>
+	<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+		<title>Vehículos</title>
+	</head>
+	<body>
+	<input type="submit" value="Imprimir" onClick="window.print();"/>
+	<table border="0" cellpadding="0" cellspacing="0" width="800" align="center">
+	<tr><td align="center" colspan="10"><big><b>Parque Automotor</b></big></td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td align="center" colspan="10"><big><b>Ministerio de la Producción, Recursos Naturales, Forestación y Tierras</b></big></td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td align="center" colspan="10"><big><b>LISTADO DE VEHÍCULOS</b></big></td></tr>
+	<tr><td align="center" colspan="10"><big><?php echo date("Y-m-d H:i:s"); ?></big></td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<?php
+	
+	$sql = "SELECT";
+	$sql.= " DISTINCTROW";
+	$sql.= "  dependencia.*";
+	$sql.= " FROM dependencia INNER JOIN vehiculo USING(id_dependencia)";
+	$sql.= " ORDER BY descrip";
+	
+	$rsDependencia = $mysqli->query($sql);
+	while ($rowDependencia = $rsDependencia->fetch_object()) {
+		?>
+		<tr><td>&nbsp;</td></tr>
+		<tr><td align="center" colspan="6"><?php echo "Dependencia: " . $rowDependencia->descrip; ?></td></tr>
+		<tr><td>&nbsp;</td></tr>
+		<tr><td colspan="10"><hr></td></tr>
+		
+		<tr><td align="center" colspan="10">
+		<table border="0" cellpadding="5" cellspacing="0" width="100%" align="center">
+		
+		<?php
+		
+		$sql = "SELECT";
+		$sql.= "  vehiculo.*";
+		$sql.= "  , tipo_vehiculo.descrip AS tipo_vehiculo_descrip";
+		$sql.= "  , dependencia.descrip AS dependencia_descrip";
+		$sql.= "  , depositario.descrip AS depositario_descrip";
+		$sql.= "  , responsable.apenom";
+		$sql.= "  , CONCAT(_localidades.localidad, ' (', _departamentos.departamento, ')') AS localidad_descrip";
+		$sql.= " FROM vehiculo INNER JOIN tipo_vehiculo USING(id_tipo_vehiculo)";
+		$sql.= "  INNER JOIN dependencia USING(id_dependencia)";
+		$sql.= "  INNER JOIN depositario USING(id_depositario)";
+		$sql.= "  INNER JOIN responsable USING(id_responsable)";
+		$sql.= "  LEFT JOIN (_localidades INNER JOIN _departamentos USING(departamento_id)) ON vehiculo.localidad_id = _localidades.localidad_id COLLATE utf8_spanish_ci";
+		$sql.= " WHERE id_dependencia=" . $rowDependencia->id_dependencia;
+		$sql.= " ORDER BY nro_patente";
+		
+		$rsVehiculo = $mysqli->query($sql);
+		echo $mysqli->error;
+		while ($rowVehiculo = $rsVehiculo->fetch_object()) {
+			?>
+
+			<tr><td><?php echo "Patente: " . $rowVehiculo->nro_patente; ?></td><td><?php echo "Marca: " . $rowVehiculo->marca; ?></td><td><?php echo "Tipo: " . $rowVehiculo->tipo_vehiculo_descrip; ?></td></tr>
+			<tr><td><?php echo "Modelo: " . $rowVehiculo->modelo; ?></td><td><?php echo "Nro.motor: " . $rowVehiculo->nro_motor; ?></td><td><?php echo "Nro.chasis: " . $rowVehiculo->nro_chasis; ?></td></tr>
+			<tr><td><?php echo "Obs.: " . $rowVehiculo->observa; ?></td><td><?php echo "Nro.seg./pol.: " . $rowVehiculo->nro_poliza; ?></td><td><?php echo "Localidad: " . $rowVehiculo->localidad_descrip; ?></td></tr>
+			<tr><td><?php echo "Dependencia: " . $rowVehiculo->dependencia_descrip; ?></td><td><?php echo "Depositario: " . $rowVehiculo->depositario_descrip; ?></td><td><?php echo "Responsable: " . $rowVehiculo->apenom; ?></td></tr>
+			<tr><td colspan="10"><hr></td></tr>
+			
+			<?php
+		}
+		
+		?>
+		
+		</table>
+		</td></tr>
+		<tr><td>&nbsp;</td></tr>
+		
+		<?php
+	}
+		
+	?>
 	</table>
 	</body>
 	</html>

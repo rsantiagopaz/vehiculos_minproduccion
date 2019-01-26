@@ -1,9 +1,1 @@
-proveedores
-razones_sociales
-unipresu
-_personal
-
-
-
-
-organismo_area_id
+En la base "tierras" hay 3 tablas de localidades: "localidades", "localidades_gps", "_localidades". Cual hay que usar
