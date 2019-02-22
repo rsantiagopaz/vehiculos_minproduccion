@@ -161,10 +161,10 @@ break;
 
 case "gastos" : {
 	
-	if (isset($_REQUEST['cod_up'])) {
-		$sql = "SELECT CONCAT(REPLACE(codigo, '-', ''), ' - ', nombre) AS descrip FROM unipresu WHERE cod_up=" . $_REQUEST['cod_up'];
-		$rsUnipresu = $mysqli->query($sql);
-		$rowUnipresu = $rsUnipresu->fetch_object();
+	if (isset($_REQUEST['id_dependencia'])) {
+		$sql = "SELECT descrip FROM dependencia WHERE id_dependencia=" . $_REQUEST['id_dependencia'];
+		$rsDependencia = $mysqli->query($sql);
+		$rowDependencia = $rsDependencia->fetch_object();
 	}
 	
 	?>
@@ -188,9 +188,9 @@ case "gastos" : {
 	<tr><td>&nbsp;</td></tr>
 	
 	<?php
-	if (isset($_REQUEST['cod_up'])) {
+	if (isset($_REQUEST['id_dependencia'])) {
 		?>
-		<tr><td align="center" colspan="10"><big>Unidad presup.: <?php echo $rowUnipresu->descrip; ?></big></td></tr>
+		<tr><td align="center" colspan="10"><big>Dependencia: <?php echo $rowDependencia->descrip; ?></big></td></tr>
 		<tr><td>&nbsp;</td></tr>
 		<?php
 	}
@@ -203,9 +203,9 @@ case "gastos" : {
 	<tr><th>Vehículo</th><th>#</th><th>Taller</th>
 	
 	<?php
-	if (isset($_REQUEST['cod_up'])) {
+	if (! isset($_REQUEST['id_dependencia'])) {
 		?>
-		<th>Unidad presup.</th>
+		<th>Dependencia</th>
 		<?php
 	}
 	?>
@@ -221,21 +221,21 @@ case "gastos" : {
 
 	
 	$sql = "SELECT * FROM(";
-	$sql.= "(SELECT movimiento.*, razones_sociales.razon_social AS taller, entsal.cod_up, vehiculo.nro_patente, vehiculo.marca, CONCAT(REPLACE(unipresu.codigo, '-', ''), ' - ', unipresu.nombre) AS up FROM (((movimiento INNER JOIN razones_sociales USING(cod_razon_social)) INNER JOIN entsal USING(id_entsal)) INNER JOIN vehiculo USING(id_vehiculo)) LEFT JOIN unipresu USING(cod_up))";
+	$sql.= "(SELECT movimiento.*, razones_sociales.razon_social AS taller, vehiculo.nro_patente, vehiculo.marca, dependencia.id_dependencia, dependencia.descrip AS dependencia_descrip FROM (((movimiento INNER JOIN razones_sociales USING(cod_razon_social)) INNER JOIN entsal USING(id_entsal)) INNER JOIN vehiculo USING(id_vehiculo)) INNER JOIN dependencia USING(id_dependencia))";
 	$sql.= " UNION ALL";
-	$sql.= "(SELECT movimiento.*, temporal_1.razon_social AS taller, entsal.cod_up, vehiculo.nro_patente, vehiculo.marca, CONCAT(REPLACE(unipresu.codigo, '-', ''), ' - ', unipresu.nombre) AS up FROM (((movimiento INNER JOIN ";
+	$sql.= "(SELECT movimiento.*, temporal_1.razon_social AS taller, vehiculo.nro_patente, vehiculo.marca, dependencia.id_dependencia, dependencia.descrip AS dependencia_descrip FROM (((movimiento INNER JOIN ";
 		$sql.= "(";
 		$sql.= "SELECT";
 		$sql.= "  0 AS cod_razon_social";
 		$sql.= ", 'Parque Automotor' AS razon_social";
 		$sql.= ") AS temporal_1";
-	$sql.= " USING(cod_razon_social)) INNER JOIN entsal USING(id_entsal)) INNER JOIN vehiculo USING(id_vehiculo)) LEFT JOIN unipresu USING(cod_up))";
+	$sql.= " USING(cod_razon_social)) INNER JOIN entsal USING(id_entsal)) INNER JOIN vehiculo USING(id_vehiculo)) INNER JOIN dependencia USING(id_dependencia))";
 	$sql.= ") AS temporal_2";
 	$sql.= " WHERE estado='S'";
 	
-	if (isset($_REQUEST['cod_up'])) $sql.= " AND cod_up=" . $_REQUEST['cod_up'];
-	if (! is_null($_REQUEST['desde'])) $sql.= " AND DATE(f_sal) >= '" . $_REQUEST['desde'] . "'";
-	if (! is_null($_REQUEST['hasta'])) $sql.= " AND DATE(f_sal) <= '" . $_REQUEST['hasta'] . "'";
+	if (isset($_REQUEST['id_dependencia'])) $sql.= " AND id_dependencia=" . $_REQUEST['id_dependencia'];
+	if (isset($_REQUEST['desde'])) $sql.= " AND DATE(f_sal) >= '" . $_REQUEST['desde'] . "'";
+	if (isset($_REQUEST['hasta'])) $sql.= " AND DATE(f_sal) <= '" . $_REQUEST['hasta'] . "'";
 	
 	$sql.= " ORDER BY f_ent DESC";
 	
@@ -249,9 +249,9 @@ case "gastos" : {
 		<td><?php echo $row->id_movimiento; ?></td>
 		<td><?php echo $row->taller; ?></td>
 		<?php
-		if (is_null($_REQUEST['cod_up'])) {
+		if (! isset($_REQUEST['id_dependencia'])) {
 			?>
-			<td><?php echo $row->up; ?></td>
+			<td><?php echo $row->dependencia_descrip; ?></td>
 			<?php
 		}
 		?>
@@ -263,7 +263,7 @@ case "gastos" : {
 	?>
 	
 	<?php
-	if (! isset($_REQUEST['cod_up'])) {
+	if (! isset($_REQUEST['id_dependencia'])) {
 		?>
 		<tr><td colspan="6" align="right"><?php echo number_format($total, 2, ",", "."); ?></td></tr>
 		<?php

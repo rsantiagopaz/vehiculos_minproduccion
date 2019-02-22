@@ -194,7 +194,7 @@ qx.Class.define("vehiculos.Application",
         win.center();
         win.open();
       });
-      mnuEdicion.add(btnNuevoChofer);
+      //mnuEdicion.add(btnNuevoChofer);
       
       var btnIncidentes = new qx.ui.menu.Button("Incidentes...");
       //btnIncidentes.setEnabled(false);
@@ -205,7 +205,7 @@ qx.Class.define("vehiculos.Application",
         win.center();
         win.open();
       });
-      mnuEdicion.add(btnIncidentes);
+      //mnuEdicion.add(btnIncidentes);
       
       var btnParamet = new qx.ui.menu.Button("Parámetros...");
       btnParamet.addListener("execute", function(){
