@@ -210,7 +210,7 @@ qx.Class.define("vehiculos.comp.pageGeneral",
 		tblGral.setEnabled(false);
 		
 		var p = {};
-		p.texto = rowDataGral.nro_patente;
+		p.id_vehiculo = rowDataGral.id_vehiculo;
 		
 		var rpc = new vehiculos.comp.rpc.Rpc("services/", "comp.Vehiculo");
 		rpc.addListener("completed", function(e){

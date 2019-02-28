@@ -489,6 +489,12 @@ qx.Class.define("vehiculos.comp.pageParticular",
 	aux.setReadOnly(true);
 	aux.setDecorator("main");
 	aux.setBackgroundColor("#ffffc0");
+	formInfoVehiculo.add(aux, "Nro.chasis", null, "nro_chasis");
+	
+	aux = new qx.ui.form.TextField();
+	aux.setReadOnly(true);
+	aux.setDecorator("main");
+	aux.setBackgroundColor("#ffffc0");
 	formInfoVehiculo.add(aux, "Marca", null, "marca");
 	
 	aux = new qx.ui.form.TextField();
@@ -508,12 +514,6 @@ qx.Class.define("vehiculos.comp.pageParticular",
 	aux.setDecorator("main");
 	aux.setBackgroundColor("#ffffc0");
 	formInfoVehiculo.add(aux, "Nro.motor", null, "nro_motor");
-	
-	aux = new qx.ui.form.TextField();
-	aux.setReadOnly(true);
-	aux.setDecorator("main");
-	aux.setBackgroundColor("#ffffc0");
-	formInfoVehiculo.add(aux, "Nro.chasis", null, "nro_chasis");
 	
 	aux = new qx.ui.form.TextArea();
 	aux.setReadOnly(true);

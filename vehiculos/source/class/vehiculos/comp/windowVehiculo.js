@@ -137,7 +137,8 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 	
 	
 	var cboVehiculo = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Vehiculo", methodName: "autocompletarVehiculoCompleto"});
-	cboVehiculo.setWidth(175);
+	cboVehiculo.setWidth(330);
+	
 	var lstVehiculo = cboVehiculo.getChildControl("list");
 	lstVehiculo.addListener("changeSelection", function(e){
 		var datos, modelForm;
@@ -168,12 +169,12 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 			}, this);
 			
 			rpc.callAsyncListeners(true, "preparar_foto", p);
-			
+
+			modelForm = qx.data.marshal.Json.createModel(datos, true);
+			controllerFormInfoVehiculo.setModel(modelForm);
 		}
-		
-		modelForm = qx.data.marshal.Json.createModel(datos, true);
-		controllerFormInfoVehiculo.setModel(modelForm);
 	}, this);
+	
 	var popupVehiculo = cboVehiculo.getChildControl("popup");
 	popupVehiculo.addListener("disappear", function(e){
 		var datos, modelForm;
@@ -231,10 +232,10 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 			}, this);
 			
 			rpc.callAsyncListeners(true, "preparar_foto", p);
+			
+			modelForm = qx.data.marshal.Json.createModel(datos, true);
+			controllerFormInfoVehiculo.setModel(modelForm);
 		}
-		
-		modelForm = qx.data.marshal.Json.createModel(datos, true);
-		controllerFormInfoVehiculo.setModel(modelForm);
 	}, this);
 	
 	this.add(new qx.ui.basic.Label("Buscar:"), {left: 55, top: 3});
@@ -254,19 +255,29 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 	var formInfoVehiculo = new qx.ui.form.Form();
 	
 	var txtNro_patente = new qx.ui.form.TextField();
-	txtNro_patente.setRequired(true);
+	//txtNro_patente.setRequired(true);
 	txtNro_patente.addListener("blur", function(e){
 		var value = this.getValue();
 		this.setValue((value == null) ? "" : value.trim().toUpperCase());
 	});
 	formInfoVehiculo.add(txtNro_patente, "Nro.patente", null, "nro_patente", null, {tabIndex: 3, item: {row: 1, column: 1, colSpan: 4}});
 	
+	
+	var txtNro_chasis = new qx.ui.form.TextField();
+	//txtNro_chasis.setRequired(true);
+	txtNro_chasis.addListener("blur", function(e){
+		var value = this.getValue();
+		this.setValue((value == null) ? "" : value.trim().toUpperCase());
+	});
+	formInfoVehiculo.add(txtNro_chasis, "Nro.chasis", null, "nro_chasis", null, {item: {row: 2, column: 1, colSpan: 6}});
+	
+	
 	var aux = new qx.ui.form.TextField();
 	aux.addListener("blur", function(e){
 		var value = this.getValue();
 		this.setValue((value == null) ? "" : value.trim());
 	});
-	formInfoVehiculo.add(aux, "Marca", null, "marca", null, {item: {row: 2, column: 1, colSpan: 8}});
+	formInfoVehiculo.add(aux, "Marca", null, "marca", null, {item: {row: 3, column: 1, colSpan: 8}});
 	
 
 	aux = new qx.ui.form.SelectBox();
@@ -281,7 +292,7 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 		aux.add(new qx.ui.form.ListItem(resultado[x].label, null, resultado[x].model));
 	}
 	
-	formInfoVehiculo.add(aux, "Tipo", null, "id_tipo_vehiculo", null, {item: {row: 3, column: 1, colSpan: 8}});
+	formInfoVehiculo.add(aux, "Tipo", null, "id_tipo_vehiculo", null, {item: {row: 4, column: 1, colSpan: 8}});
 
 	
 	aux = new qx.ui.form.TextField();
@@ -289,22 +300,15 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 		var value = this.getValue();
 		this.setValue((value == null) ? "" : value.trim());
 	});
-	formInfoVehiculo.add(aux, "Modelo (año)", null, "modelo", null, {item: {row: 4, column: 1, colSpan: 2}});
+	formInfoVehiculo.add(aux, "Modelo (año)", null, "modelo", null, {item: {row: 5, column: 1, colSpan: 2}});
 	
 	aux = new qx.ui.form.TextField();
 	aux.addListener("blur", function(e){
 		var value = this.getValue();
 		this.setValue((value == null) ? "" : value.trim());
 	});
-	formInfoVehiculo.add(aux, "Nro.motor", null, "nro_motor", null, {item: {row: 5, column: 1, colSpan: 6}});
+	formInfoVehiculo.add(aux, "Nro.motor", null, "nro_motor", null, {item: {row: 6, column: 1, colSpan: 6}});
 	
-	aux = new qx.ui.form.TextField();
-	aux.setRequired(true);
-	aux.addListener("blur", function(e){
-		var value = this.getValue();
-		this.setValue((value == null) ? "" : value.trim());
-	});
-	formInfoVehiculo.add(aux, "Nro.chasis", null, "nro_chasis", null, {item: {row: 6, column: 1, colSpan: 6}});
 	
 	aux = new qx.ui.form.TextArea();
 	aux.addListener("blur", function(e){
@@ -323,6 +327,7 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 	
 	
 	var cboLocalidad = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Parametros", methodName: "autocompletarLocalidad"});
+	cboLocalidad.setRequired(true);
 	formInfoVehiculo.add(cboLocalidad, "Localidad", function(value) {
 		if (lstLocalidad.isSelectionEmpty()) throw new qx.core.ValidationError("Validation Error", "Debe seleccionar localidad");
 	}, "cboLocalidad", null, {item: {row: 9, column: 1, colSpan: 13}});
@@ -367,6 +372,21 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 	this.add(formViewVehiculo, {left: 0, top: 45});
 	
 	
+	
+	
+	formInfoVehiculo.getValidationManager().setValidator(function(items) {
+		if (txtNro_patente.getValue()=="" && txtNro_chasis.getValue()=="") {
+			txtNro_patente.setValid(false);
+			txtNro_chasis.setValid(false);
+			txtNro_patente.setInvalidMessage("Debe ingresar Nro.patente y/o Nro.chasis");
+			txtNro_chasis.setInvalidMessage("Debe ingresar Nro.patente y/o Nro.chasis");
+			return false;
+		} else {
+			txtNro_patente.setValid(true);
+			txtNro_chasis.setValid(true);
+			return true;
+		}
+	});
 
 	
 	
@@ -464,13 +484,20 @@ qx.Class.define("vehiculos.comp.windowVehiculo",
 			rpc.addListener("failed", function(e){
 				var data = e.getData();
 				
-				if (data.message == "duplicado") {
+				if (data.message == "nro_patente_duplicado") {
 					txtNro_patente.setInvalidMessage("Nro.patente duplicado");
 					txtNro_patente.setValid(false);
 					txtNro_patente.focus();
 					
 					var manager = qx.ui.tooltip.Manager.getInstance();
 					manager.showToolTip(txtNro_patente);
+				} else if (data.message == "nro_chasis_duplicado") {
+					txtNro_chasis.setInvalidMessage("Nro.chasis duplicado");
+					txtNro_chasis.setValid(false);
+					txtNro_chasis.focus();
+					
+					var manager = qx.ui.tooltip.Manager.getInstance();
+					manager.showToolTip(txtNro_chasis);
 				}
 			}, this);
 			

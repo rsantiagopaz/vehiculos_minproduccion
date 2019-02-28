@@ -221,9 +221,9 @@ case "gastos" : {
 
 	
 	$sql = "SELECT * FROM(";
-	$sql.= "(SELECT movimiento.*, razones_sociales.razon_social AS taller, vehiculo.nro_patente, vehiculo.marca, dependencia.id_dependencia, dependencia.descrip AS dependencia_descrip FROM (((movimiento INNER JOIN razones_sociales USING(cod_razon_social)) INNER JOIN entsal USING(id_entsal)) INNER JOIN vehiculo USING(id_vehiculo)) INNER JOIN dependencia USING(id_dependencia))";
+	$sql.= "(SELECT movimiento.*, razones_sociales.razon_social AS taller, vehiculo.nro_patente, vehiculo.nro_chasis, vehiculo.marca, dependencia.id_dependencia, dependencia.descrip AS dependencia_descrip FROM (((movimiento INNER JOIN razones_sociales USING(cod_razon_social)) INNER JOIN entsal USING(id_entsal)) INNER JOIN vehiculo USING(id_vehiculo)) INNER JOIN dependencia USING(id_dependencia))";
 	$sql.= " UNION ALL";
-	$sql.= "(SELECT movimiento.*, temporal_1.razon_social AS taller, vehiculo.nro_patente, vehiculo.marca, dependencia.id_dependencia, dependencia.descrip AS dependencia_descrip FROM (((movimiento INNER JOIN ";
+	$sql.= "(SELECT movimiento.*, temporal_1.razon_social AS taller, vehiculo.nro_patente, vehiculo.nro_chasis, vehiculo.marca, dependencia.id_dependencia, dependencia.descrip AS dependencia_descrip FROM (((movimiento INNER JOIN ";
 		$sql.= "(";
 		$sql.= "SELECT";
 		$sql.= "  0 AS cod_razon_social";
@@ -243,9 +243,17 @@ case "gastos" : {
 	while ($row = $rs->fetch_object()) {
 		$row->total = (float) $row->total;
 		$total+= $row->total;
+		
+		$aux = array();
+		if (! empty($row->nro_patente)) $aux[] = "n.p. " . $row->nro_patente;
+		if (! empty($row->nro_chasis)) $aux[] = "n.ch. " . $row->nro_chasis;
+		if (! empty($row->marca)) $aux[] = $row->marca;
+		$row->vehiculo = implode(", ", $aux);
+		
+		
 		?>
 		<tr>
-		<td><?php echo $row->nro_patente . "  " . $row->marca; ?></td>
+		<td><?php echo $row->vehiculo; ?></td>
 		<td><?php echo $row->id_movimiento; ?></td>
 		<td><?php echo $row->taller; ?></td>
 		<?php
@@ -509,6 +517,13 @@ case "historial" : {
 	$rsVehiculo = $mysqli->query($sql);
 	$rowVehiculo = $rsVehiculo->fetch_object();
 	
+	$aux = array();
+	if (! empty($rowVehiculo->nro_patente)) $aux[] = "n.p. " . $rowVehiculo->nro_patente;
+	if (! empty($rowVehiculo->nro_chasis)) $aux[] = "n.ch. " . $rowVehiculo->nro_chasis;
+	if (! empty($rowVehiculo->marca)) $aux[] = $rowVehiculo->marca;
+	$rowVehiculo->vehiculo = implode(", ", $aux);
+	
+	
 	$sql = "SELECT";
 	$sql.= " descrip AS label";
 	$sql.= " FROM dependencia";
@@ -538,7 +553,7 @@ case "historial" : {
 	<tr><td align="center" colspan="6"><big><b>Ministerio de la Producción, Recursos Naturales, Forestación y Tierras</b></big></td></tr>
 	<tr><td>&nbsp;</td></tr>
 	<tr><td>&nbsp;</td></tr>
-	<tr><td><b>Historial Vehiculo: <?php echo $rowVehiculo->nro_patente . "  " . $rowVehiculo->marca; ?></b></td></tr>
+	<tr><td colSpan="6"><b>Historial Vehiculo: <?php echo $rowVehiculo->vehiculo; ?></b></td></tr>
 	<tr><td colspan="20">Dependencia: <?php echo $rowVehiculo->dependencia; ?></td></tr>
 	<tr><td>&nbsp;</td></tr>
 	<tr><td>Usuario: <?php echo $_SESSION['login']->usuario; ?></td></tr>
@@ -644,6 +659,14 @@ case "salida_vehiculo" : {
 	$rsEntsal = $mysqli->query($sql);
 	$rowEntsal = $rsEntsal->fetch_object();
 	
+	$aux = array();
+	if (! empty($rowEntsal->nro_patente)) $aux[] = "n.p. " . $rowEntsal->nro_patente;
+	if (! empty($rowEntsal->nro_chasis)) $aux[] = "n.ch. " . $rowEntsal->nro_chasis;
+	if (! empty($rowEntsal->marca)) $aux[] = $rowEntsal->marca;
+	$rowEntsal->vehiculo = implode(", ", $aux);
+	
+	
+	
 	$sql = "SELECT";
 	$sql.= " descrip AS label";
 	$sql.= " FROM dependencia";
@@ -675,7 +698,7 @@ case "salida_vehiculo" : {
 	<tr><td align="center" colspan="6"><big><?php echo date("Y-m-d H:i:s"); ?></big></td></tr>
 	<tr><td>&nbsp;</td></tr>
 	<tr><td>&nbsp;</td></tr>
-	<tr><td><b>Vehículo: <?php echo $rowEntsal->nro_patente . "  " . $rowEntsal->marca; ?></b></td><td>Salida: <?php echo $rowEntsal->f_sal; ?></td><td>Km: <?php echo $rowEntsal->kilo; ?></td></tr>
+	<tr><td><b>Vehículo: <?php echo $rowEntsal->vehiculo; ?></b></td><td>Salida: <?php echo $rowEntsal->f_sal; ?></td><td>Km: <?php echo $rowEntsal->kilo; ?></td></tr>
 	<tr><td colspan="20">Dependencia: <?php echo $rowEntsal->dependencia; ?></td></tr>
 	<tr><td>&nbsp;</td></tr>
 	<tr><td>Usuario: <?php echo $_SESSION['login']->usuario; ?></td><td>Responsable: <?php echo $rowEntsal->resp_sal; ?></td></tr>
@@ -768,6 +791,13 @@ case "entrada_taller" : {
 	$rsEntsal = $mysqli->query($sql);
 	$rowEntsal = $rsEntsal->fetch_object();
 	
+	$aux = array();
+	if (! empty($rowEntsal->nro_patente)) $aux[] = "n.p. " . $rowEntsal->nro_patente;
+	if (! empty($rowEntsal->nro_chasis)) $aux[] = "n.ch. " . $rowEntsal->nro_chasis;
+	if (! empty($rowEntsal->marca)) $aux[] = $rowEntsal->marca;
+	$rowEntsal->vehiculo = implode(", ", $aux);
+	
+	
 	$sql = "SELECT";
 	$sql.= " descrip AS label";
 	$sql.= " FROM dependencia";
@@ -819,7 +849,7 @@ case "entrada_taller" : {
 	<tr><td align="center" colspan="6"><big><?php echo date("d/m/Y H:i:s"); ?></big></td></tr>
 	<tr><td>&nbsp;</td></tr>
 	<tr><td>&nbsp;</td></tr>
-	<tr><td><b>Vehiculo: <?php echo $rowEntsal->nro_patente . "  " . $rowEntsal->marca; ?></b></td><td>Entrada: <?php $aux = new DateTime($rowMovimiento->f_ent); echo $aux->format("d/m/Y H:i:s"); ?></td></tr>
+	<tr><td><b>Vehiculo: <?php echo $rowEntsal->vehiculo; ?></b></td><td>Entrada: <?php $aux = new DateTime($rowMovimiento->f_ent); echo $aux->format("d/m/Y H:i:s"); ?></td></tr>
 	<tr><td colspan="20">Dependencia: <?php echo $rowEntsal->dependencia; ?></td></tr>
 	<tr><td>&nbsp;</td></tr>
 	<tr><td>Usuario: <?php echo $_SESSION['login']->usuario; ?></td></tr>
@@ -1080,10 +1110,17 @@ case "vehiculos" : {
 		$rsVehiculo = $mysqli->query($sql);
 		echo $mysqli->error;
 		while ($rowVehiculo = $rsVehiculo->fetch_object()) {
+			
+			$aux = array();
+			if (! empty($rowVehiculo->nro_patente)) $aux[] = "n.p. " . $rowVehiculo->nro_patente;
+			if (! empty($rowVehiculo->nro_chasis)) $aux[] = "n.ch. " . $rowVehiculo->nro_chasis;
+			if (! empty($rowVehiculo->marca)) $aux[] = $rowVehiculo->marca;
+			$rowVehiculo->vehiculo = implode(", ", $aux);
+			
 			?>
 
-			<tr><td><?php echo "Patente: " . $rowVehiculo->nro_patente; ?></td><td><?php echo "Marca: " . $rowVehiculo->marca; ?></td><td><?php echo "Tipo: " . $rowVehiculo->tipo_vehiculo_descrip; ?></td></tr>
-			<tr><td><?php echo "Modelo: " . $rowVehiculo->modelo; ?></td><td><?php echo "Nro.motor: " . $rowVehiculo->nro_motor; ?></td><td><?php echo "Nro.chasis: " . $rowVehiculo->nro_chasis; ?></td></tr>
+			<tr><td><?php echo "Nro.patente: " . $rowVehiculo->nro_patente; ?></td><td><?php echo "Nro.chasis: " . $rowVehiculo->nro_chasis; ?></td><td><?php echo "Marca: " . $rowVehiculo->marca; ?></td></tr>
+			<tr><td><?php echo "Tipo: " . $rowVehiculo->tipo_vehiculo_descrip; ?></td><td><?php echo "Modelo: " . $rowVehiculo->modelo; ?></td><td><?php echo "Nro.motor: " . $rowVehiculo->nro_motor; ?></td></tr>
 			<tr><td><?php echo "Obs.: " . $rowVehiculo->observa; ?></td><td><?php echo "Nro.seg./pol.: " . $rowVehiculo->nro_poliza; ?></td><td><?php echo "Localidad: " . $rowVehiculo->localidad_descrip; ?></td></tr>
 			<tr><td><?php echo "Dependencia: " . $rowVehiculo->dependencia_descrip; ?></td><td><?php echo "Depositario: " . $rowVehiculo->depositario_descrip; ?></td><td><?php echo "Responsable: " . $rowVehiculo->apenom; ?></td></tr>
 			<tr><td colspan="10"><hr></td></tr>

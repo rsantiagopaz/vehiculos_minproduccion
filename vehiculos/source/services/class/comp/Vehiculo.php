@@ -457,9 +457,16 @@ class class_Vehiculo extends class_Base
   	$id_vehiculo = $p->model->id_vehiculo;
   	
   	$sql = "SELECT id_vehiculo FROM vehiculo WHERE nro_patente='" . $p->model->nro_patente . "' AND id_vehiculo <> " . $id_vehiculo;
-  	$rs = $this->mysqli->query($sql);
-  	if ($rs->num_rows > 0) {
-  		$error->SetError(0, "duplicado");
+  	$rs1 = $this->mysqli->query($sql);
+  	
+  	$sql = "SELECT id_vehiculo FROM vehiculo WHERE nro_chasis='" . $p->model->nro_chasis . "' AND id_vehiculo <> " . $id_vehiculo;
+  	$rs2 = $this->mysqli->query($sql);
+  	
+  	if (! empty($p->model->nro_patente) && $rs1->num_rows > 0) {
+  		$error->SetError(0, "nro_patente_duplicado");
+  		return $error;
+  	} else if (! empty($p->model->nro_chasis) && $rs2->num_rows > 0) {
+  		$error->SetError(0, "nro_chasis_duplicado");
   		return $error;
   	} else {
   		
@@ -502,11 +509,18 @@ class class_Vehiculo extends class_Base
   	$asu = 0;
   	$dif = 0;
  	
-	$sql = "SELECT id_entsal, id_dependencia, nro_patente, CONCAT(nro_patente, '  ', marca) AS vehiculo, f_ent, f_sal, asunto, entsal.estado, entsal.diferido FROM entsal INNER JOIN vehiculo USING(id_vehiculo) WHERE vehiculo.id_parque=" . $_SESSION['parque']->id_parque . " AND entsal.estado<>'A' AND (entsal.estado='E' OR entsal.estado='T' OR entsal.asunto OR entsal.diferido) ORDER BY f_ent DESC";
+	$sql = "SELECT id_entsal, id_dependencia, nro_patente, nro_chasis, marca, f_ent, f_sal, asunto, entsal.estado, entsal.diferido, vehiculo.id_vehiculo FROM entsal INNER JOIN vehiculo USING(id_vehiculo) WHERE vehiculo.id_parque=" . $_SESSION['parque']->id_parque . " AND entsal.estado<>'A' AND (entsal.estado='E' OR entsal.estado='T' OR entsal.asunto OR entsal.diferido) ORDER BY f_ent DESC";
 	$rs = $this->mysqli->query($sql);
 	while ($row = $rs->fetch_object()) {
 		$row->asunto = (bool) $row->asunto;
 		$row->diferido = (bool) $row->diferido;
+		
+		$aux = array();
+		if (! empty($row->nro_patente)) $aux[] = "n.p. " . $row->nro_patente;
+		if (! empty($row->nro_chasis)) $aux[] = "n.ch. " . $row->nro_chasis;
+		$aux[] = $row->marca;
+		
+		$row->vehiculo = implode(", ", $aux);
 		
 		$sql = "SELECT";
 		$sql.= "  descrip AS label";
@@ -663,8 +677,28 @@ class class_Vehiculo extends class_Base
   public function method_autocompletarVehiculo($params, $error) {
   	$p = $params[0];
   	
-	$sql = "SELECT CONCAT(nro_patente, '  ', marca) AS label, id_vehiculo AS model FROM vehiculo WHERE id_parque=" . $_SESSION['parque']->id_parque . " AND nro_patente LIKE '%" . $p->texto . "%' ORDER BY label";
-	return $this->toJson($sql);
+  	$resultado = array();
+  	
+	if (isset($p->id_vehiculo)) {
+		$sql = "SELECT id_vehiculo AS model, nro_patente, nro_chasis, marca FROM vehiculo WHERE id_parque=" . $_SESSION['parque']->id_parque . " AND id_vehiculo=" . $p->id_vehiculo;	
+	} else {
+		$sql = "SELECT id_vehiculo AS model, nro_patente, nro_chasis, marca FROM vehiculo WHERE id_parque=" . $_SESSION['parque']->id_parque . " AND (nro_patente LIKE '%" . $p->texto . "%' OR nro_chasis LIKE '%" . $p->texto . "%') ORDER BY nro_patente, nro_chasis, marca";  		
+	}
+  	
+	$rs = $this->mysqli->query($sql);
+	while ($row = $rs->fetch_object()) {
+		
+		$aux = array();
+		if (! empty($row->nro_patente)) $aux[] = "n.p. " . $row->nro_patente;
+		if (! empty($row->nro_chasis)) $aux[] = "n.ch. " . $row->nro_chasis;
+		if (! empty($row->marca)) $aux[] = $row->marca;
+		
+		$row->label = implode(", ", $aux);
+		
+		$resultado[] = $row;
+	}
+	
+	return $resultado;
   }
   
   
@@ -673,7 +707,16 @@ class class_Vehiculo extends class_Base
   	
   	$resultado = array();
   	
-	$sql = "SELECT * FROM vehiculo WHERE id_parque=" . $_SESSION['parque']->id_parque . " AND nro_patente LIKE '%" . $p->texto . "%' ORDER BY nro_patente, marca";
+	$sql = "(SELECT * FROM vehiculo WHERE id_parque=" . $_SESSION['parque']->id_parque . " AND nro_patente LIKE '%" . $p->texto . "%')";
+	$sql.= " UNION";
+	$sql.= " (SELECT * FROM vehiculo WHERE id_parque=" . $_SESSION['parque']->id_parque . " AND nro_chasis LIKE '%" . $p->texto . "%')";
+	$sql.= " ORDER BY nro_patente, nro_chasis, marca";
+	
+	
+	
+	
+	$sql = "SELECT * FROM vehiculo WHERE id_parque=" . $_SESSION['parque']->id_parque . " AND (nro_patente LIKE '%" . $p->texto . "%' OR nro_chasis LIKE '%" . $p->texto . "%') ORDER BY nro_patente, nro_chasis, marca";
+	
 	
 	$rs = $this->mysqli->query($sql);
 	while ($row = $rs->fetch_object()) {
@@ -683,7 +726,13 @@ class class_Vehiculo extends class_Base
 		$rowAux = new stdClass;
 		
 		$rowAux->model = $row->id_vehiculo;
-		$rowAux->label = $row->nro_patente . "  " . $row->marca;
+		
+		$aux = array();
+		if (! empty($row->nro_patente)) $aux[] = "n.p. " . $row->nro_patente;
+		if (! empty($row->nro_chasis)) $aux[] = "n.ch. " . $row->nro_chasis;
+		if (! empty($row->marca)) $aux[] = $row->marca;
+		
+		$rowAux->label = implode(", ", $aux);
 		
 		$rowAux->vehiculo = $row;
 		
