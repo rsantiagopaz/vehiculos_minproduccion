@@ -112,18 +112,9 @@ qx.Class.define("vehiculos.comp.windowListado",
 	
 	
 	
-	var rbtA2 = new qx.ui.form.RadioButton("Incidentes").set({value: true});
+	var rbtA2 = new qx.ui.form.RadioButton("Responsables").set({value: true});
 	rbtA2.addListener("changeValue", function(e){
 		var data = e.getData();
-		
-		rbtB1.setEnabled(data);
-		cboChofer.setEnabled(data && rbtB1.getValue());
-		
-		rbtB2.setEnabled(data);
-		slbTipo.setEnabled(data && rbtB2.getValue());
-		
-		rbtB3.setEnabled(data);
-		cboDependencia1.setEnabled(data && rbtB3.getValue());
 		
 		if (data) {
 			dtfDesde.setEnabled(false);
@@ -131,7 +122,7 @@ qx.Class.define("vehiculos.comp.windowListado",
 		}
 	});
 	
-	//composite.add(rbtA2, {row: 2, column: 0});
+	composite.add(rbtA2, {row: 7, column: 0});
 	rgpA.add(rbtA2);
 	
 	
@@ -239,18 +230,6 @@ qx.Class.define("vehiculos.comp.windowListado",
 			sharedErrorTooltip.setLabel("Debe seleccionar dependencia");
 			sharedErrorTooltip.placeToWidget(cboDependencia2);
 			sharedErrorTooltip.show();
-		} else if (rbtA2.getValue() && rbtB1.getValue() && lstChofer.isSelectionEmpty()) {
-			cboChofer.setValid(false);
-			cboChofer.focus();
-			sharedErrorTooltip.setLabel("Debe seleccionar chofer");
-			sharedErrorTooltip.placeToWidget(cboChofer);
-			sharedErrorTooltip.show();
-		} else if (rbtA2.getValue() && rbtB3.getValue() && lstDependencia1.isSelectionEmpty()) {
-			cboDependencia1.setValid(false);
-			cboDependencia1.focus();
-			sharedErrorTooltip.setLabel("Debe seleccionar dependencia");
-			sharedErrorTooltip.placeToWidget(cboDependencia1);
-			sharedErrorTooltip.show();
 		} else if (rbtA3.getValue() && chkDependencia.getValue() && lstDependencia2.isSelectionEmpty()) {
 			cboDependencia2.setValid(false);
 			cboDependencia2.focus();
@@ -263,15 +242,7 @@ qx.Class.define("vehiculos.comp.windowListado",
 				
 				if (chkDependencia.getValue()) txt+= "&id_dependencia=" + lstDependencia2.getSelection()[0].getModel();
 			} else if (rbtA2.getValue()) {
-				txt = "?rutina=incidentes";
-				
-				if (rbtB1.getValue()) {
-					txt+= "&id_chofer=" + lstChofer.getSelection()[0].getModel();
-				} else if (rbtB2.getValue()) {
-					txt+= "&id_tipo_incidente=" + slbTipo.getSelection()[0].getModel();
-				} else if (rbtB3.getValue()) {
-					txt+= "&organismo_area_id=" + lstDependencia1.getSelection()[0].getModel();
-				}
+				txt = "?rutina=responsables";
 			} else if (rbtA3.getValue()) {
 				txt = "?rutina=choferes";
 				

@@ -1083,6 +1083,7 @@ case "vehiculos" : {
 	while ($rowDependencia = $rsDependencia->fetch_object()) {
 		?>
 		<tr><td>&nbsp;</td></tr>
+		<tr><td>&nbsp;</td></tr>
 		<tr><td align="center" colspan="6"><?php echo "Dependencia: " . $rowDependencia->descrip; ?></td></tr>
 		<tr><td>&nbsp;</td></tr>
 		<tr><td colspan="10"><hr></td></tr>
@@ -1105,18 +1106,10 @@ case "vehiculos" : {
 		$sql.= "  INNER JOIN responsable USING(id_responsable)";
 		$sql.= "  LEFT JOIN (_localidades INNER JOIN _departamentos USING(departamento_id)) ON vehiculo.localidad_id = _localidades.localidad_id COLLATE utf8_spanish_ci";
 		$sql.= " WHERE id_dependencia=" . $rowDependencia->id_dependencia;
-		$sql.= " ORDER BY nro_patente";
+		$sql.= " ORDER BY nro_patente, nro_chasis, marca";
 		
 		$rsVehiculo = $mysqli->query($sql);
-		echo $mysqli->error;
 		while ($rowVehiculo = $rsVehiculo->fetch_object()) {
-			
-			$aux = array();
-			if (! empty($rowVehiculo->nro_patente)) $aux[] = "n.p. " . $rowVehiculo->nro_patente;
-			if (! empty($rowVehiculo->nro_chasis)) $aux[] = "n.ch. " . $rowVehiculo->nro_chasis;
-			if (! empty($rowVehiculo->marca)) $aux[] = $rowVehiculo->marca;
-			$rowVehiculo->vehiculo = implode(", ", $aux);
-			
 			?>
 
 			<tr><td><?php echo "Nro.patente: " . $rowVehiculo->nro_patente; ?></td><td><?php echo "Nro.chasis: " . $rowVehiculo->nro_chasis; ?></td><td><?php echo "Marca: " . $rowVehiculo->marca; ?></td></tr>
@@ -1133,6 +1126,85 @@ case "vehiculos" : {
 		</table>
 		</td></tr>
 		<tr><td>&nbsp;</td></tr>
+		
+		<?php
+	}
+		
+	?>
+	</table>
+	</body>
+	</html>
+	<?php
+	
+break;
+}
+
+
+
+case "responsables" : {
+	
+	?>
+	<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+		<title>Responsables</title>
+	</head>
+	<body>
+	<input type="submit" value="Imprimir" onClick="window.print();"/>
+	<table border="0" cellpadding="5" cellspacing="0" width="800" align="center">
+	<tr><td align="center" colspan="10"><big><b>Parque Automotor</b></big></td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td align="center" colspan="10"><big><b>Ministerio de la Producción, Recursos Naturales, Forestación y Tierras</b></big></td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td align="center" colspan="10"><big><b>LISTADO DE RESPONSABLES</b></big></td></tr>
+	<tr><td align="center" colspan="10"><big><?php echo date("Y-m-d H:i:s"); ?></big></td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td colspan="10"><hr></td></tr>
+	<?php
+	
+	$sql = "SELECT";
+	$sql.= " *";
+	$sql.= " FROM responsable";
+	$sql.= " ORDER BY apenom";
+	
+	$rsResponsable = $mysqli->query($sql);
+	while ($rowResponsable = $rsResponsable->fetch_object()) {
+		?>
+		<tr><td>&nbsp;</td></tr>
+		<tr><td colspan="10"><?php echo "Responsable: " . $rowResponsable->apenom; ?></td></tr>
+		<tr><td><?php echo "DNI: " . $rowResponsable->dni; ?></td><td><?php echo "Domicilio: " . $rowResponsable->domicilio; ?></td><td><?php echo "Localidad: " . $rowResponsable->localidad; ?></td></tr>
+		<tr><td><?php echo "Telef.: " . $rowResponsable->telefono; ?></td><td><?php echo "Cargo: " . $rowResponsable->cargo; ?></td><td><?php echo "Organización: " . $rowResponsable->organizacion; ?></td></tr>
+		
+		
+		<?php
+		
+		$sql = "SELECT";
+		$sql.= " *";
+		$sql.= " FROM vehiculo";
+		$sql.= " WHERE id_responsable=" . $rowResponsable->id_responsable;
+		$sql.= " ORDER BY nro_patente, nro_chasis, marca";
+		
+		$rsVehiculo = $mysqli->query($sql);
+		if ($rsVehiculo->num_rows > 0) {
+				?>
+				
+				<tr><td>&nbsp;</td></tr>
+				<tr><th>Nro.patente</th><th>Nro.chasis</th><th>Marca</th></tr>
+				
+				<?php
+			while ($rowVehiculo = $rsVehiculo->fetch_object()) {
+				?>
+				
+				<tr><td><?php echo $rowVehiculo->nro_patente; ?></td><td><?php echo $rowVehiculo->nro_chasis; ?></td><td><?php echo $rowVehiculo->marca; ?></td></tr>
+				
+				<?php
+			}
+		}
+		
+		?>
+		
+		<tr><td>&nbsp;</td></tr>
+		<tr><td colspan="10"><hr></td></tr>
 		
 		<?php
 	}
