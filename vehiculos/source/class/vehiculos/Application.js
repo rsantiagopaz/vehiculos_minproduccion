@@ -234,11 +234,13 @@ qx.Class.define("vehiculos.Application",
       
       var btnListado = new qx.ui.menu.Button("Listado...");
       btnListado.addListener("execute", function(){
-        var win = new vehiculos.comp.windowListado();
-        win.setModal(true);
-        doc.add(win);
-        win.center();
-        win.open();
+		window.setTimeout(function(e){
+	        var win = new vehiculos.comp.windowListado();
+	        win.setModal(true);
+	        doc.add(win);
+	        win.center();
+	        win.open();
+		}, 50);
       });
       mnuVer.add(btnListado);
       

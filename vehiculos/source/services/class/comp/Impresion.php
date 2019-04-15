@@ -184,18 +184,17 @@ case "gastos" : {
 	<tr><td align="center" colspan="6"><big><?php echo date("Y-m-d H:i:s"); ?></big></td></tr>
 	<tr><td>&nbsp;</td></tr>
 	<tr><td>&nbsp;</td></tr>
-	<tr><td align="center" colspan="6"><big>Período: <?php echo $_REQUEST['desde'] . " / " . $_REQUEST['hasta']; ?></big></td></tr>
-	<tr><td>&nbsp;</td></tr>
+	<tr><td align="center" colspan="6"><big><b>Período: <?php echo ((isset($_REQUEST['desde'])) ? "desde " . $_REQUEST['desde'] : "") . ((isset($_REQUEST['hasta'])) ? " hasta " . $_REQUEST['hasta'] : ""); ?></b></big></td></tr>
 	
 	<?php
 	if (isset($_REQUEST['id_dependencia'])) {
 		?>
-		<tr><td align="center" colspan="10"><big>Dependencia: <?php echo $rowDependencia->descrip; ?></big></td></tr>
+		<tr><td align="center" colspan="10"><big><b>Dependencia: <?php echo $rowDependencia->descrip; ?></b></big></td></tr>
 		<tr><td>&nbsp;</td></tr>
 		<?php
 	}
 	?>
-
+	<tr><td>&nbsp;</td></tr>
 	<tr><td>&nbsp;</td></tr>
 	<tr><td colspan="20">
 	<table border="1" rules="all" cellpadding="5" cellspacing="0" width="100%" align="center">
@@ -1070,6 +1069,50 @@ case "vehiculos" : {
 	<tr><td align="center" colspan="10"><big><b>LISTADO DE VEHÍCULOS</b></big></td></tr>
 	<tr><td align="center" colspan="10"><big><?php echo date("Y-m-d H:i:s"); ?></big></td></tr>
 	<tr><td>&nbsp;</td></tr>
+	<?php
+	
+	if (isset($_REQUEST['id_dependencia'])) {
+		$sql = "SELECT";
+		$sql.= "  *";
+		$sql.= " FROM dependencia";
+		$sql.= " WHERE id_dependencia=" . $_REQUEST['id_dependencia'];
+		
+		$rsAux = $mysqli->query($sql);
+		$rowAux = $rsAux->fetch_object();
+		
+		?>
+		<tr><td align="center" colspan="6"><big><b><?php echo "Dependencia: " . $rowAux->descrip; ?></b></big></td></tr>
+		<?php
+	}
+	if (isset($_REQUEST['id_tipo_vehiculo'])) {
+		$sql = "SELECT";
+		$sql.= "  *";
+		$sql.= " FROM tipo_vehiculo";
+		$sql.= " WHERE id_tipo_vehiculo=" . $_REQUEST['id_tipo_vehiculo'];
+		
+		$rsAux = $mysqli->query($sql);
+		$rowAux = $rsAux->fetch_object();
+		
+		?>
+		<tr><td align="center" colspan="6"><big><b><?php echo "Tipo vehículo: " . $rowAux->descrip; ?></b></big></td></tr>
+		<?php
+	}
+	if (isset($_REQUEST['departamento_id'])) {
+		$sql = "SELECT";
+		$sql.= "  *";
+		$sql.= " FROM _departamentos";
+		$sql.= " WHERE departamento_id=" . $_REQUEST['departamento_id'];
+		
+		$rsAux = $mysqli->query($sql);
+		$rowAux = $rsAux->fetch_object();
+		
+		?>
+		<tr><td align="center" colspan="6"><big><b><?php echo "Departamento: " . $rowAux->departamento; ?></b></big></td></tr>
+		<?php
+	}
+	
+	?>
+	<tr><td>&nbsp;</td></tr>
 	<tr><td>&nbsp;</td></tr>
 	<?php
 	
@@ -1077,6 +1120,9 @@ case "vehiculos" : {
 	$sql.= " DISTINCTROW";
 	$sql.= "  dependencia.*";
 	$sql.= " FROM dependencia INNER JOIN vehiculo USING(id_dependencia)";
+	if (isset($_REQUEST['id_dependencia'])) {
+		$sql.= " WHERE dependencia.id_dependencia=" . $_REQUEST['id_dependencia'];
+	}
 	$sql.= " ORDER BY descrip";
 	
 	$rsDependencia = $mysqli->query($sql);
@@ -1106,6 +1152,12 @@ case "vehiculos" : {
 		$sql.= "  INNER JOIN responsable USING(id_responsable)";
 		$sql.= "  LEFT JOIN (_localidades INNER JOIN _departamentos USING(departamento_id)) ON vehiculo.localidad_id = _localidades.localidad_id COLLATE utf8_spanish_ci";
 		$sql.= " WHERE id_dependencia=" . $rowDependencia->id_dependencia;
+		if (isset($_REQUEST['id_tipo_vehiculo'])) {
+			$sql.= " AND vehiculo.id_tipo_vehiculo=" . $_REQUEST['id_tipo_vehiculo'];
+		}
+		if (isset($_REQUEST['departamento_id'])) {
+			$sql.= " AND _departamentos.departamento_id=" . $_REQUEST['departamento_id'];
+		}
 		$sql.= " ORDER BY nro_patente, nro_chasis, marca";
 		
 		$rsVehiculo = $mysqli->query($sql);
@@ -1159,12 +1211,34 @@ case "responsables" : {
 	<tr><td align="center" colspan="10"><big><b>LISTADO DE RESPONSABLES</b></big></td></tr>
 	<tr><td align="center" colspan="10"><big><?php echo date("Y-m-d H:i:s"); ?></big></td></tr>
 	<tr><td>&nbsp;</td></tr>
+	<?php
+	
+	if (isset($_REQUEST['id_responsable'])) {
+		$sql = "SELECT";
+		$sql.= "  *";
+		$sql.= " FROM responsable";
+		$sql.= " WHERE id_responsable=" . $_REQUEST['id_responsable'];
+		
+		$rsAux = $mysqli->query($sql);
+		$rowAux = $rsAux->fetch_object();
+		
+		?>
+		<tr><td align="center" colspan="6"><big><b><?php echo "Responsable: " . $rowAux->apenom; ?></b></big></td></tr>
+		<?php
+	}
+	
+	?>
+	<tr><td>&nbsp;</td></tr>
 	<tr><td colspan="10"><hr></td></tr>
 	<?php
+
 	
 	$sql = "SELECT";
 	$sql.= " *";
 	$sql.= " FROM responsable";
+	if (isset($_REQUEST['id_responsable'])) {
+		$sql.= " WHERE id_responsable=" . $_REQUEST['id_responsable'];
+	}
 	$sql.= " ORDER BY apenom";
 	
 	$rsResponsable = $mysqli->query($sql);
