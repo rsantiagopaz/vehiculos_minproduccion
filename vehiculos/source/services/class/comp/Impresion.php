@@ -840,6 +840,10 @@ case "entrada_taller" : {
 	<body>
 	<input type="submit" value="Imprimir" onClick="window.print();"/>
 	<table border="0" cellpadding="0" cellspacing="0" width="800" align="center">
+	<tr><td colspan="20" align="center"><img src="../../../resource/vehiculos/logo.jpg" width="350"></td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td>&nbsp;</td></tr>
 	<tr><td align="center" colspan="6"><big><b>Parque Automotor</b></big></td></tr>
 	<tr><td>&nbsp;</td></tr>
 	<tr><td align="center" colspan="6"><big><b>Ministerio de la Producción, Recursos Naturales, Forestación y Tierras</b></big></td></tr>
