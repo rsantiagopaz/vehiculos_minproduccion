@@ -234,7 +234,9 @@ class class_Vehiculo extends class_Base
   public function method_leer_movimiento($params, $error) {
   	$p = $params[0];
   	
-	function functionAux1(&$row, $key) {
+  	
+  	$opciones = new stdClass;
+  	$opciones->functionAux = function (&$row, $key) {
 		$row->kilo = (float) $row->kilo;
 		$row->total = (float) $row->total;
 		
@@ -243,9 +245,6 @@ class class_Vehiculo extends class_Base
 		
 		$row->bandera_estado = ($row->estado == "A") ? -1 : 0;
 	};
-  	
-  	$opciones = new stdClass;
-  	$opciones->functionAux = functionAux1;
 	
 	
 	$sql = "SELECT * FROM (";
@@ -439,7 +438,9 @@ class class_Vehiculo extends class_Base
   public function method_leer_entsal($params, $error) {
   	$p = $params[0];
   	
-	function functionAux1(&$row, $key) {
+  	
+  	$opciones = new stdClass;
+  	$opciones->functionAux = function (&$row, $key) {
 		$row->kilo = (float) $row->kilo;
 		$row->total = (float) $row->total;
 		
@@ -447,9 +448,6 @@ class class_Vehiculo extends class_Base
 		
 		$row->bandera_estado = ($row->estado == "A") ? -1 : 0;
 	};
-  	
-  	$opciones = new stdClass;
-  	$opciones->functionAux = functionAux1;
   	
 	$sql = "SELECT entsal.* FROM entsal WHERE id_vehiculo=" . $p->id_vehiculo . " ORDER BY f_ent DESC";
 	

@@ -43,7 +43,8 @@ qx.Class.define("vehiculos.comp.windowListado",
 		
 		if (data) {
 			cboDependencia.setEnabled(true);
-			slbTipo_vehiculo.setEnabled(false);
+			cboTaller.setEnabled(true);
+			slbTipo_vehiculo.setEnabled(true);
 			cboDepartamento.setEnabled(false);
 			cboResponsable.setEnabled(false);
 			
@@ -63,6 +64,7 @@ qx.Class.define("vehiculos.comp.windowListado",
 
 		if (data) {
 			cboDependencia.setEnabled(true);
+			cboTaller.setEnabled(false);
 			slbTipo_vehiculo.setEnabled(true);
 			cboDepartamento.setEnabled(true);
 			cboResponsable.setEnabled(false);
@@ -72,7 +74,7 @@ qx.Class.define("vehiculos.comp.windowListado",
 		}
 	});
 	
-	composite.add(rbtA2, {row: 1, column: 0});
+	composite.add(rbtA2, {row: 2, column: 0});
 	rgpA.add(rbtA2);
 	
 	
@@ -82,6 +84,7 @@ qx.Class.define("vehiculos.comp.windowListado",
 		
 		if (data) {
 			cboDependencia.setEnabled(false);
+			cboTaller.setEnabled(false);
 			slbTipo_vehiculo.setEnabled(false);
 			cboDepartamento.setEnabled(false);
 			cboResponsable.setEnabled(true);
@@ -91,7 +94,7 @@ qx.Class.define("vehiculos.comp.windowListado",
 		}
 	});
 	
-	composite.add(rbtA3, {row: 3, column: 0});
+	composite.add(rbtA3, {row: 4, column: 0});
 	rgpA.add(rbtA3);
 	
 	
@@ -102,8 +105,13 @@ qx.Class.define("vehiculos.comp.windowListado",
 	composite.add(cboDependencia, {row: 0, column: 3, colSpan: 3});
 	
 	
+	composite.add(new qx.ui.basic.Label("Taller: "), {row: 1, column: 2});
+	var cboTaller = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Parametros", methodName: "autocompletarTaller"});
+	var lstTaller = cboTaller.getChildControl("list");
+	composite.add(cboTaller, {row: 1, column: 3, colSpan: 3});
 	
-	composite.add(new qx.ui.basic.Label("Tipo vehículo: "), {row: 1, column: 2});
+	
+	composite.add(new qx.ui.basic.Label("Tipo vehículo: "), {row: 2, column: 2});
 	var slbTipo_vehiculo = new qx.ui.form.SelectBox();
 	slbTipo_vehiculo.add(new qx.ui.form.ListItem("-", null, "0"));
 	var rpc = new vehiculos.comp.rpc.Rpc("services/", "comp.Vehiculo");
@@ -115,21 +123,21 @@ qx.Class.define("vehiculos.comp.windowListado",
 	for (var x in resultado) {
 		slbTipo_vehiculo.add(new qx.ui.form.ListItem(resultado[x].label, null, resultado[x].model));
 	}
-	composite.add(slbTipo_vehiculo, {row: 1, column: 3, colSpan: 3});
+	composite.add(slbTipo_vehiculo, {row: 2, column: 3, colSpan: 3});
 	
 	
 	
-	composite.add(new qx.ui.basic.Label("Departamento: "), {row: 2, column: 2});
+	composite.add(new qx.ui.basic.Label("Departamento: "), {row: 3, column: 2});
 	var cboDepartamento = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Parametros", methodName: "autocompletarDepartamento"});
 	var lstDepartamento = cboDepartamento.getChildControl("list");
-	composite.add(cboDepartamento, {row: 2, column: 3, colSpan: 3});
+	composite.add(cboDepartamento, {row: 3, column: 3, colSpan: 3});
 	
 	
 
-	composite.add(new qx.ui.basic.Label("Responsable: "), {row: 3, column: 2});
+	composite.add(new qx.ui.basic.Label("Responsable: "), {row: 4, column: 2});
 	var cboResponsable = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Responsable", methodName: "autocompletarResponsable"});
 	var lstResponsable = cboResponsable.getChildControl("list");
-	composite.add(cboResponsable, {row: 3, column: 3, colSpan: 3});
+	composite.add(cboResponsable, {row: 4, column: 3, colSpan: 3});
 	
 
 	
@@ -182,6 +190,9 @@ qx.Class.define("vehiculos.comp.windowListado",
 		
 		if (cboDependencia.getEnabled()) {
 			if (! lstDependencia.isSelectionEmpty()) txt+= "&id_dependencia=" + lstDependencia.getModelSelection().getItem(0);
+		}
+		if (cboTaller.getEnabled()) {
+			if (! lstTaller.isSelectionEmpty()) txt+= "&cod_razon_social=" + lstTaller.getModelSelection().getItem(0);
 		}
 		if (slbTipo_vehiculo.getEnabled()) {
 			aux = slbTipo_vehiculo.getModelSelection().getItem(0);

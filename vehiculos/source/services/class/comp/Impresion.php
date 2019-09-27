@@ -166,6 +166,24 @@ case "gastos" : {
 		$rsDependencia = $mysqli->query($sql);
 		$rowDependencia = $rsDependencia->fetch_object();
 	}
+	if (isset($_REQUEST['cod_razon_social'])) {
+		$sql = "SELECT";
+		$sql.= "  razones_sociales.cod_razon_social AS model";
+		$sql.= ", CONCAT(razones_sociales.razon_social, ' (', proveedores.cuit, ')') AS label";
+		$sql.= ", proveedores.cuit";
+		$sql.= ", razones_sociales.razon_social";
+		$sql.= " FROM (proveedores INNER JOIN razones_sociales USING(cod_proveedor)) INNER JOIN taller USING(cod_razon_social)";
+		$sql.= " WHERE cod_razon_social=" . $_REQUEST['cod_razon_social'];
+		$sql.= " ORDER BY label";
+		
+		$rsTaller = $mysqli->query($sql);
+		$rowTaller = $rsTaller->fetch_object();
+	}
+	if (isset($_REQUEST['id_tipo_vehiculo'])) {
+		$sql = "SELECT descrip FROM tipo_vehiculo WHERE id_tipo_vehiculo=" . $_REQUEST['id_tipo_vehiculo'];
+		$rsTipoVehiculo = $mysqli->query($sql);
+		$rowTipoVehiculo = $rsTipoVehiculo->fetch_object();
+	}
 	
 	?>
 	<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
@@ -190,10 +208,20 @@ case "gastos" : {
 	if (isset($_REQUEST['id_dependencia'])) {
 		?>
 		<tr><td align="center" colspan="10"><big><b>Dependencia: <?php echo $rowDependencia->descrip; ?></b></big></td></tr>
-		<tr><td>&nbsp;</td></tr>
 		<?php
 	}
+	if (isset($_REQUEST['cod_razon_social'])) {
+		?>
+		<tr><td align="center" colspan="10"><big><b>Taller: <?php echo $rowTaller->label; ?></b></big></td></tr>
+		<?php
+	}
+	if (isset($_REQUEST['id_tipo_vehiculo'])) {
+		?>
+		<tr><td align="center" colspan="10"><big><b>Tipo vehículo: <?php echo $rowTipoVehiculo->descrip; ?></b></big></td></tr>
+		<?php
+	}	
 	?>
+	<tr><td>&nbsp;</td></tr>
 	<tr><td>&nbsp;</td></tr>
 	<tr><td>&nbsp;</td></tr>
 	<tr><td colspan="20">
@@ -220,9 +248,9 @@ case "gastos" : {
 
 	
 	$sql = "SELECT * FROM(";
-	$sql.= "(SELECT movimiento.*, razones_sociales.razon_social AS taller, vehiculo.nro_patente, vehiculo.nro_chasis, vehiculo.marca, dependencia.id_dependencia, dependencia.descrip AS dependencia_descrip FROM (((movimiento INNER JOIN razones_sociales USING(cod_razon_social)) INNER JOIN entsal USING(id_entsal)) INNER JOIN vehiculo USING(id_vehiculo)) INNER JOIN dependencia USING(id_dependencia))";
+	$sql.= "(SELECT movimiento.*, razones_sociales.razon_social AS taller, vehiculo.id_tipo_vehiculo, vehiculo.nro_patente, vehiculo.nro_chasis, vehiculo.marca, dependencia.id_dependencia, dependencia.descrip AS dependencia_descrip FROM (((movimiento INNER JOIN razones_sociales USING(cod_razon_social)) INNER JOIN entsal USING(id_entsal)) INNER JOIN vehiculo USING(id_vehiculo)) INNER JOIN dependencia USING(id_dependencia))";
 	$sql.= " UNION ALL";
-	$sql.= "(SELECT movimiento.*, temporal_1.razon_social AS taller, vehiculo.nro_patente, vehiculo.nro_chasis, vehiculo.marca, dependencia.id_dependencia, dependencia.descrip AS dependencia_descrip FROM (((movimiento INNER JOIN ";
+	$sql.= "(SELECT movimiento.*, temporal_1.razon_social AS taller, vehiculo.id_tipo_vehiculo, vehiculo.nro_patente, vehiculo.nro_chasis, vehiculo.marca, dependencia.id_dependencia, dependencia.descrip AS dependencia_descrip FROM (((movimiento INNER JOIN ";
 		$sql.= "(";
 		$sql.= "SELECT";
 		$sql.= "  0 AS cod_razon_social";
@@ -233,6 +261,8 @@ case "gastos" : {
 	$sql.= " WHERE estado='S'";
 	
 	if (isset($_REQUEST['id_dependencia'])) $sql.= " AND id_dependencia=" . $_REQUEST['id_dependencia'];
+	if (isset($_REQUEST['cod_razon_social'])) $sql.= " AND cod_razon_social=" . $_REQUEST['cod_razon_social'];
+	if (isset($_REQUEST['id_tipo_vehiculo'])) $sql.= " AND id_tipo_vehiculo=" . $_REQUEST['id_tipo_vehiculo'];
 	if (isset($_REQUEST['desde'])) $sql.= " AND DATE(f_sal) >= '" . $_REQUEST['desde'] . "'";
 	if (isset($_REQUEST['hasta'])) $sql.= " AND DATE(f_sal) <= '" . $_REQUEST['hasta'] . "'";
 	
