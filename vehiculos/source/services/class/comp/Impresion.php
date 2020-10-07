@@ -324,6 +324,172 @@ break;
 }
 
 
+case "pendientes" : {
+	
+	if (isset($_REQUEST['id_dependencia'])) {
+		$sql = "SELECT descrip FROM dependencia WHERE id_dependencia=" . $_REQUEST['id_dependencia'];
+		$rsDependencia = $mysqli->query($sql);
+		$rowDependencia = $rsDependencia->fetch_object();
+	}
+	if (isset($_REQUEST['cod_razon_social'])) {
+		$sql = "SELECT";
+		$sql.= "  razones_sociales.cod_razon_social AS model";
+		$sql.= ", CONCAT(razones_sociales.razon_social, ' (', proveedores.cuit, ')') AS label";
+		$sql.= ", proveedores.cuit";
+		$sql.= ", razones_sociales.razon_social";
+		$sql.= " FROM (proveedores INNER JOIN razones_sociales USING(cod_proveedor)) INNER JOIN taller USING(cod_razon_social)";
+		$sql.= " WHERE cod_razon_social=" . $_REQUEST['cod_razon_social'];
+		$sql.= " ORDER BY label";
+		
+		$rsTaller = $mysqli->query($sql);
+		$rowTaller = $rsTaller->fetch_object();
+	}
+	if (isset($_REQUEST['id_tipo_vehiculo'])) {
+		$sql = "SELECT descrip FROM tipo_vehiculo WHERE id_tipo_vehiculo=" . $_REQUEST['id_tipo_vehiculo'];
+		$rsTipoVehiculo = $mysqli->query($sql);
+		$rowTipoVehiculo = $rsTipoVehiculo->fetch_object();
+	}
+	
+	?>
+	<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+		<title>Gastos</title>
+	</head>
+	<body>
+	<input type="submit" value="Imprimir" onClick="window.print();"/>
+	<table border="0" cellpadding="0" cellspacing="0" width="800" align="center">
+	<tr><td align="center" colspan="6"><big><b>Parque Automotor</b></big></td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td align="center" colspan="6"><big><b>Ministerio de la Producción, Recursos Naturales, Forestación y Tierras</b></big></td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td align="center" colspan="6"><big><b>LISTADO PENDIENTES</b></big></td></tr>
+	<tr><td align="center" colspan="6"><big><?php echo date("Y-m-d H:i:s"); ?></big></td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td align="center" colspan="6"><big><b>Período: <?php echo ((isset($_REQUEST['desde'])) ? "desde " . $_REQUEST['desde'] : "") . ((isset($_REQUEST['hasta'])) ? " hasta " . $_REQUEST['hasta'] : ""); ?></b></big></td></tr>
+	
+	<?php
+	if (isset($_REQUEST['id_dependencia'])) {
+		?>
+		<tr><td align="center" colspan="10"><big><b>Dependencia: <?php echo $rowDependencia->descrip; ?></b></big></td></tr>
+		<?php
+	}
+	if (isset($_REQUEST['cod_razon_social'])) {
+		?>
+		<tr><td align="center" colspan="10"><big><b>Taller: <?php echo $rowTaller->label; ?></b></big></td></tr>
+		<?php
+	}
+	if (isset($_REQUEST['id_tipo_vehiculo'])) {
+		?>
+		<tr><td align="center" colspan="10"><big><b>Tipo vehículo: <?php echo $rowTipoVehiculo->descrip; ?></b></big></td></tr>
+		<?php
+	}	
+	?>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr><td colspan="20">
+	<table border="1" rules="all" cellpadding="5" cellspacing="0" width="100%" align="center">
+	<thead>
+	<tr><th>Vehículo</th><th>#</th><th>Taller</th>
+	
+	<?php
+	if (! isset($_REQUEST['id_dependencia'])) {
+		?>
+		<th>Dependencia</th>
+		<?php
+	}
+	?>
+	
+	<th>Obs.</th><th>Entrada</th></tr>
+	</thead>
+	<tbody>
+	<?php
+	
+	$total = 0;
+	
+
+
+	
+	$sql = "SELECT * FROM(";
+	$sql.= "(SELECT movimiento.*, razones_sociales.razon_social AS taller, vehiculo.id_tipo_vehiculo, vehiculo.nro_patente, vehiculo.nro_chasis, vehiculo.marca, dependencia.id_dependencia, dependencia.descrip AS dependencia_descrip FROM (((movimiento INNER JOIN razones_sociales USING(cod_razon_social)) INNER JOIN entsal USING(id_entsal)) INNER JOIN vehiculo USING(id_vehiculo)) INNER JOIN dependencia USING(id_dependencia))";
+	$sql.= " UNION ALL";
+	$sql.= "(SELECT movimiento.*, temporal_1.razon_social AS taller, vehiculo.id_tipo_vehiculo, vehiculo.nro_patente, vehiculo.nro_chasis, vehiculo.marca, dependencia.id_dependencia, dependencia.descrip AS dependencia_descrip FROM (((movimiento INNER JOIN ";
+		$sql.= "(";
+		$sql.= "SELECT";
+		$sql.= "  0 AS cod_razon_social";
+		$sql.= ", 'Parque Automotor' AS razon_social";
+		$sql.= ") AS temporal_1";
+	$sql.= " USING(cod_razon_social)) INNER JOIN entsal USING(id_entsal)) INNER JOIN vehiculo USING(id_vehiculo)) INNER JOIN dependencia USING(id_dependencia))";
+	$sql.= ") AS temporal_2";
+	$sql.= " WHERE (estado='E' OR estado='D')";
+	
+	if (isset($_REQUEST['id_dependencia'])) $sql.= " AND id_dependencia=" . $_REQUEST['id_dependencia'];
+	if (isset($_REQUEST['cod_razon_social'])) $sql.= " AND cod_razon_social=" . $_REQUEST['cod_razon_social'];
+	if (isset($_REQUEST['id_tipo_vehiculo'])) $sql.= " AND id_tipo_vehiculo=" . $_REQUEST['id_tipo_vehiculo'];
+	if (isset($_REQUEST['desde'])) $sql.= " AND DATE(f_ent) >= '" . $_REQUEST['desde'] . "'";
+	if (isset($_REQUEST['hasta'])) $sql.= " AND DATE(f_ent) <= '" . $_REQUEST['hasta'] . "'";
+	
+	$sql.= " ORDER BY f_ent DESC";
+	
+	$rs = $mysqli->query($sql);
+	while ($row = $rs->fetch_object()) {
+		$row->total = (float) $row->total;
+		$total+= $row->total;
+		
+		$aux = array();
+		if (! empty($row->nro_patente)) $aux[] = "n.p. " . $row->nro_patente;
+		if (! empty($row->nro_chasis)) $aux[] = "n.ch. " . $row->nro_chasis;
+		if (! empty($row->marca)) $aux[] = $row->marca;
+		$row->vehiculo = implode(", ", $aux);
+		
+		
+		?>
+		<tr>
+		<td><?php echo $row->vehiculo; ?></td>
+		<td><?php echo $row->id_movimiento; ?></td>
+		<td><?php echo $row->taller; ?></td>
+		<?php
+		if (! isset($_REQUEST['id_dependencia'])) {
+			?>
+			<td><?php echo $row->dependencia_descrip; ?></td>
+			<?php
+		}
+		?>
+		<td><?php echo $row->observa; ?></td>
+		<td><?php echo $row->f_ent; ?></td>
+		<!-- <td align="right"><?php echo number_format($row->total, 2, ",", "."); ?></td> -->
+		</tr>
+		<?php
+	}
+	?>
+	<!-- 
+	<?php
+	if (! isset($_REQUEST['id_dependencia'])) {
+		?>
+		<tr><td colspan="6" align="right"><?php echo number_format($total, 2, ",", "."); ?></td></tr>
+		<?php
+	} else {
+		?>
+		<tr><td colspan="5" align="right"><?php echo number_format($total, 2, ",", "."); ?></td></tr>
+		<?php
+	}
+	?>
+	 -->
+
+	</tbody>
+	</table>
+	</td></tr>
+	</table>
+	</body>
+	</html>
+	<?php
+	
+break;
+}
+
+
 case "incidentes" : {
 	
 	?>

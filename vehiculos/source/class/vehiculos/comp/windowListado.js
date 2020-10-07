@@ -99,6 +99,27 @@ qx.Class.define("vehiculos.comp.windowListado",
 	
 	
 	
+	var rbtA4 = new qx.ui.form.RadioButton("Pendientes").set({value: true});
+	rbtA4.addListener("changeValue", function(e){
+		var data = e.getData();
+		
+		if (data) {
+			cboDependencia.setEnabled(true);
+			cboTaller.setEnabled(true);
+			slbTipo_vehiculo.setEnabled(true);
+			cboDepartamento.setEnabled(false);
+			cboResponsable.setEnabled(false);
+			
+			dtfDesde.setEnabled(true);
+			dtfHasta.setEnabled(true);
+		}
+	});
+	
+	composite.add(rbtA4, {row: 6, column: 0});
+	rgpA.add(rbtA4);
+	
+	
+	
 	composite.add(new qx.ui.basic.Label("Dependencia: "), {row: 0, column: 2});
 	var cboDependencia = new componente.comp.ui.ramon.combobox.ComboBoxAuto({url: "services/", serviceName: "comp.Vehiculo", methodName: "autocompletarDependencia"});
 	var lstDependencia = cboDependencia.getChildControl("list");
@@ -166,10 +187,10 @@ qx.Class.define("vehiculos.comp.windowListado",
 	aux.setDate(aux.getDate() - 1);
 	dtfHasta.setValue(aux);
 	
-	composite.add(new qx.ui.basic.Label("Desde: "), {row: 7, column: 2});
-	composite.add(dtfDesde, {row: 7, column: 3});
-	composite.add(new qx.ui.basic.Label("Hasta: "), {row: 7, column: 4});
-	composite.add(dtfHasta, {row: 7, column: 5});
+	composite.add(new qx.ui.basic.Label("Desde: "), {row: 9, column: 2});
+	composite.add(dtfDesde, {row: 9, column: 3});
+	composite.add(new qx.ui.basic.Label("Hasta: "), {row: 9, column: 4});
+	composite.add(dtfHasta, {row: 9, column: 5});
 	
 	
 	
@@ -186,6 +207,9 @@ qx.Class.define("vehiculos.comp.windowListado",
 			
 		} else if (rbtA3.getValue()) {
 			txt = "?rutina=responsables";
+		
+		} else if (rbtA4.getValue()) {
+			txt = "?rutina=pendientes";
 		}
 		
 		if (cboDependencia.getEnabled()) {
